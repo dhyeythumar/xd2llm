@@ -1,0 +1,53 @@
+# Adobe XD Specifications Extractor
+
+-   **Text Element/Node:** Extract the text properties in specific format.
+
+    JSON Format:
+
+    ```json
+    {
+        "nodeType": "TEXT",
+        "nodeValue": "Hello World",
+        "properties": {
+            "fontFamily": "Stevie Sans",
+            "fontWeight": "bold",
+            "fontSize": 16,
+            "fontStyle": "normal", // normal, italic, oblique
+            "color": "#000000",
+            "lineHeight": 1.5,
+            "letterSpacing": 1,
+            "textAlign": "left",
+            "textDecoration": "none", // underline, line-through, none
+            "textTransform": "none", // uppercase, lowercase, capitalize, none
+        }
+        "children": null // always null for text nodes, as text nodes don't have children
+    }
+    ```
+
+    SCSS Format:
+
+    ```scss
+    font-family: <variable-name>;
+    font-weight: <variable-name>;
+    font-size: <variable-name>;
+    color: <variable-name>;
+    line-height: 18px;
+    letter-spacing: 0.66px;
+    text-decoration: underline / line-through;
+    text-transform: uppercase / lowercase / capitalize;
+    ```
+
+-   Group
+-   Rectangle
+
+-   Ellipse
+-   Line
+-   Path
+-   RepeatGrid
+-   BooleanGroup
+
+---
+
+### References
+
+-   https://developer.adobe.com/xd/uxp/

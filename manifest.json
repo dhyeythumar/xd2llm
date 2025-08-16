@@ -1,0 +1,43 @@
+{
+    "id": "xd-plugin",
+    "name": "Adobe XD Spec Extractor.",
+    "version": "1.0.0",
+    "description": "Extract design specs from XD in SCSS or JSON.",
+    "languages": ["en"],
+    "author": "Dhyey Thumar",
+    "host": [
+        {
+            "app": "XD",
+            "minVersion": "59.0.12"
+        }
+    ],
+    "icons": [
+        {
+            "width": 24,
+            "height": 24,
+            "path": "images/icon@1x.png"
+        },
+        {
+            "width": 48,
+            "height": 48,
+            "path": "images/icon@2x.png"
+        }
+    ],
+    "uiEntryPoints": [
+        {
+            "type": "panel",
+            "label": "Extract Design Spec in SCSS",
+            "panelId": "scssDesignSpecExtractor"
+        },
+        {
+            "type": "panel",
+            "label": "Extract Design Spec in JSON",
+            "panelId": "jsonDesignSpecExtractor"
+        },
+        {
+            "type": "menu",
+            "label": "Quick Spec Extract (Modal)",
+            "commandId": "quickSpecExtract"
+        }
+    ]
+}
