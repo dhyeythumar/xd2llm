@@ -1,0 +1,24 @@
+{
+    "name": "xd-plugin",
+    "version": "1.0.0",
+    "description": "Extract design specs from XD in SCSS or JSON.",
+    "homepage": "https://github.com/dhyeythumar/xd-plugin#readme",
+    "bugs": {
+        "url": "https://github.com/dhyeythumar/xd-plugin/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dhyeythumar/xd-plugin.git"
+    },
+    "license": "MIT",
+    "author": "Dhyey Thumar",
+    "type": "commonjs",
+    "main": "main.js",
+    "scripts": {
+        "plugin:validate": "xdpm validate .",
+        "plugin:package": "xdpm package"
+    },
+    "dependencies": {
+        "@adobe/xdpm": "^4.1.1"
+    }
+}

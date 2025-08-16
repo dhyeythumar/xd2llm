@@ -12,7 +12,6 @@
             "fontFamily": "Stevie Sans",
             "fontWeight": "bold",
             "fontSize": 16,
-            "fontStyle": "normal", // normal, italic, oblique
             "color": "#000000",
             "lineHeight": 1.5,
             "letterSpacing": 1,
@@ -45,6 +44,18 @@
 -   Path
 -   RepeatGrid
 -   BooleanGroup
+
+## Installation guide
+
+```bash
+# Step 0. Validate the plugin:
+npm run plugin:validate
+
+# Step 1. Package the plugin:
+npm run plugin:package
+
+# Step 2: Double click the .xdx file & it will install the plugin.
+```
 
 ---
 
