@@ -15,6 +15,8 @@
     "type": "commonjs",
     "main": "main.js",
     "scripts": {
+        "plugin:install": "xdpm install -o -c",
+        "plugin:watch": "xdpm watch -c",
         "plugin:validate": "xdpm validate .",
         "plugin:package": "xdpm package"
     },

@@ -47,6 +47,20 @@
 
 ## Installation guide
 
+**Install XD plugin in development mode:**
+
+```bash
+# Step 1. Install plugin using XD CLI
+npm run plugin:install
+
+# Step 2. Restart the XD app
+
+# If you want live reload (HMR) then use this command:
+npm run plugin:watch
+```
+
+**Official way to install XD plugin:**
+
 ```bash
 # Step 0. Validate the plugin:
 npm run plugin:validate
