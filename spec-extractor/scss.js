@@ -1,19 +1,20 @@
 const { UIHelper, rgbToHex, copyToClipboard } = require('../utils/helper.js');
 const { SCSS_VARIABLE_MAP, ACCEPTABLE_CSS_VALUES } = require('../utils/const.js');
 
-const { selection } = require('scenegraph');
+const { selection, Rectangle, Ellipse } = require('scenegraph');
+// const { Text, Line, Path, Group, RepeatGrid, BooleanGroup } = require('scenegraph');
 let scssPanel;
 
 /**
  * - **Display & Layout**: Properties like: `display`, `position`, `top/right/bottom/left`, `flex`, `grid`, `z-index`, `overflow`, `visibility`.
  *
- * - **Box Model**: Properties like: `width`, `height`, `margin`, `padding`, `box-sizing`, `border`, `outline`.
+ * - **Box Model**: Properties like: `width`, `height`, `margin`, `padding`, `box-sizing`, `border`, `border-radius`, `outline`.
  *
  * - **Backgrounds**: Properties like: `background-color`, `background-image`, `background-*`.
  *
- * - **Typography**: Properties like: `font-family`, `font-weight`, `font-size`, `font-style`, `color`, `line-height`, `letter-spacing`, `text-align`, `text-transform`, `text-decoration`, `white-space`.
+ * - **Typography**: Properties like: `font-family`, `font-weight`, `font-size`, `font-style`, `color`, `line-height`, `letter-spacing`, `text-align`, `text-decoration`, `text-transform`, `white-space`.
  *
- * - **Visual Effects**: Properties like: `opacity`, `box-shadow`, `border-radius`, `transform`, `filter`, `pointer-events`.
+ * - **Visual Effects**: Properties like: `opacity`, `box-shadow`, `transform`, `filter`, `pointer-events`.
  *
  * - **Transitions & Animations**
  *
@@ -187,7 +188,8 @@ function create() {
             </div>
             
             <div id="spec-warning" class="warning show">
-                Please select a <strong>text element</strong> in your Adobe XD document to generate SCSS typography styles.
+                Please select an <strong>element</strong> in your Adobe XD document to generate SCSS styles.<br>
+                <small>Supports: Text (typography), Rectangle, Ellipse (background & dimensions)</small>
             </div>
         </div>
     `;
@@ -275,7 +277,7 @@ function extractTextProperties(textItem) {
     if (textItem.fill && textItem.fill.constructor.name === 'Color') {
         colorValue = rgbToHex(textItem.fill).toLowerCase();
     }
-    properties.color = SCSS_VARIABLE_MAP.color[colorValue] || colorValue;
+    properties.color = SCSS_VARIABLE_MAP.fontColor[colorValue] || SCSS_VARIABLE_MAP.color[colorValue] || colorValue;
 
     // -------------------------------------------------------------
     // Line Height
@@ -315,7 +317,7 @@ function extractTextProperties(textItem) {
     else properties.textTransform = textItem.textTransform || 'none';
 
     // -------------------------------------------------------------
-    // Display Properties
+    // Display Extracted Properties
     // -------------------------------------------------------------
     const elementName = textItem.name || 'text-element';
     displayProperties(properties, elementName);
@@ -363,6 +365,104 @@ function generateTextSCSS(properties) {
     return scss;
 }
 
+/**
+ * Format of Background properties in SCSS:
+ * ----------------------------------------
+ * width: 100px;
+ * height: 50px;
+ * border: 1px solid <variable-name>;
+ * border-radius: <variable-name>;
+ * background-color: <variable-name>;
+ */
+function extractBackgroundProperties(shapeItem) {
+    const properties = {};
+
+    // -------------------------------------------------------------
+    // Dimensions
+    // -------------------------------------------------------------
+    const bounds = shapeItem.localBounds;
+    properties.width = `${Math.round(bounds.width)}px`;
+    properties.height = `${Math.round(bounds.height)}px`;
+
+    // -------------------------------------------------------------
+    // Border (stroke properties) (TODO :: check this)
+    // -------------------------------------------------------------
+    if (shapeItem.stroke && shapeItem.stroke.constructor.name === 'Color') {
+        const strokeColor = rgbToHex(shapeItem.stroke).toLowerCase();
+        const strokeWidth = shapeItem.strokeWidth || 1;
+        const strokeColorVar = SCSS_VARIABLE_MAP.color[strokeColor] || strokeColor;
+        properties.border = `${strokeWidth}px solid ${strokeColorVar}`;
+    }
+
+    // -------------------------------------------------------------
+    // Border Radius (for Rectangle elements)
+    // -------------------------------------------------------------
+    if (shapeItem instanceof Rectangle && shapeItem.cornerRadii) {
+        const radii = shapeItem.cornerRadii;
+        // Check if all corners have the same radius
+        if (
+            radii.topLeft === radii.topRight &&
+            radii.topRight === radii.bottomRight &&
+            radii.bottomRight === radii.bottomLeft
+        ) {
+            if (radii.topLeft > 0) {
+                const radius = `${radii.topLeft}px`;
+                properties.borderRadius = SCSS_VARIABLE_MAP.borderRadius[radius] || radius;
+            }
+        } else {
+            // Different corner radii
+            properties.borderRadius = `${radii.topLeft}px ${radii.topRight}px ${radii.bottomRight}px ${radii.bottomLeft}px`;
+        }
+    } else if (shapeItem instanceof Ellipse) {
+        properties.borderRadius = SCSS_VARIABLE_MAP.borderRadius['50%'];
+    }
+
+    // -------------------------------------------------------------
+    // Background Color (from fill property)
+    // -------------------------------------------------------------
+    if (shapeItem.fill && shapeItem.fill.constructor.name === 'Color') {
+        const colorValue = rgbToHex(shapeItem.fill).toLowerCase();
+        properties.backgroundColor =
+            SCSS_VARIABLE_MAP.bgColor[colorValue] || SCSS_VARIABLE_MAP.color[colorValue] || colorValue;
+    }
+
+    // -------------------------------------------------------------
+    // Display Extracted Properties
+    // -------------------------------------------------------------
+    const elementName = shapeItem.name || `${shapeItem.constructor.name.toLowerCase()}-element`;
+    displayProperties(properties, elementName);
+
+    return properties;
+}
+
+function generateBackgroundSCSS(properties) {
+    let scss = '';
+
+    // Add properties in logical order for CSS
+    if (properties.width) {
+        scss += `width: ${properties.width};\n`;
+    }
+    if (properties.height) {
+        scss += `height: ${properties.height};\n`;
+    }
+    if (properties.border) {
+        scss += `border: ${properties.border};\n`;
+    }
+    if (properties.borderRadius) {
+        scss += `border-radius: ${properties.borderRadius};\n`;
+    }
+    if (properties.backgroundColor) {
+        scss += `background-color: ${properties.backgroundColor};\n`;
+    }
+
+    // -------------------------------------------------------------
+    // Display the SCSS code
+    // -------------------------------------------------------------
+    displaySCSS(scss);
+
+    return scss;
+}
+
 // -------------------------------------------------------------
 // Panel Functions
 // -------------------------------------------------------------
@@ -390,6 +490,11 @@ function update() {
     switch (selectedItem.constructor.name) {
         case 'Text': {
             generateTextSCSS(extractTextProperties(selectedItem));
+            break;
+        }
+        case 'Rectangle':
+        case 'Ellipse': {
+            generateBackgroundSCSS(extractBackgroundProperties(selectedItem));
             break;
         }
         default: {

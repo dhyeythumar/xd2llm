@@ -2,6 +2,24 @@
  * Map of XD property values to SCSS variables
  */
 const SCSS_VARIABLE_MAP = {
+    color: {
+        '#667980': '$color-slate',
+        '#8fb98f': '$color-sage',
+        '#e1e8e7': '$color-glacier-gray',
+        '#ffffff': '$color-white',
+        '#000000': '$color-black',
+    },
+    borderRadius: {
+        '4px': '$border-radius-4',
+        '6px': '$border-radius-6',
+        '50%': '$border-radius-50',
+    },
+    bgColor: {
+        '#e1e8e7': '$bg-color-primary',
+        '#eaefee': '$bg-color-secondary',
+        '#eff3f2': '$bg-color-tertiary',
+        '#f5f8f7': '$bg-color-quaternary',
+    },
     // aka fontFamily in Adobe XD (no fallback)
     fontFamily: {
         'stevie sans': '$font-family-stevie',
@@ -29,24 +47,10 @@ const SCSS_VARIABLE_MAP = {
         20: '$font-size-20',
         24: '$font-size-24',
     },
-    color: {
-        '#667980': '$hex-667980',
-        '#88969d': '$hex-88969D',
-        '#52666d': '$hex-52666D',
-        '#4c5d64': '$hex-4C5D64',
-        '#657980': '$hex-657980',
-        '#90a1a8': '$hex-90A1A8',
-        '#6f8187': '$hex-6F8187',
-        '#e1e8e7': '$hex-E1E8E7',
-        '#e3e9e7': '$hex-E3E9E7',
-        '#eff3f2': '$hex-EFF3F2',
-        '#eaefee': '$hex-EAEFEE',
-        '#ffffff': '$hex-FFFFFF',
-        '#000000': '$hex-000000',
-        '#8fb98f': '$hex-8FB98F',
-        '#8fb88f': '$hex-8FB88F',
-        '#ca742b': '$hex-CA742B',
-        '#d91f1f': '$hex-D91F1F',
+    fontColor: {
+        '#667980': '$font-color-default',
+        '#7d9098': '$font-color-subtle',
+        '#90a1a8': '$font-color-subtlest',
     },
 };
 

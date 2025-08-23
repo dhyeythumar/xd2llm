@@ -1,6 +1,6 @@
 # Adobe XD Specifications Extractor
 
--   **Text Element/Node:** Extract the text properties in specific format.
+-   **Text Element/Node**: Extract the text properties in specific format.
 
     JSON Format:
 
@@ -36,10 +36,19 @@
     text-transform: uppercase / lowercase / capitalize;
     ```
 
--   Group
--   Rectangle
+-   **Rectangle/Ellipse**: Extract the rectangle/ellipse properties in specific format.
 
--   Ellipse
+    SCSS Format:
+
+    ```scss
+    width: 96px;
+    height: 96px;
+    border: 1px solid <variable-name>;
+    border-radius: <variable-name>;
+    background-color: <variable-name>;
+    ```
+
+-   Group
 -   Line
 -   Path
 -   RepeatGrid
