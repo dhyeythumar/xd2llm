@@ -1,8 +1,9 @@
-const { UIHelper, rgbToHex, rgbaToHex, copyToClipboard } = require('../utils/helper.js');
-const { SCSS_VARIABLE_MAP, ACCEPTABLE_CSS_VALUES } = require('../utils/const.js');
+const { selection } = require('scenegraph');
 
-const { selection, Rectangle, Ellipse } = require('scenegraph');
-// const { Text, Line, Path, Group, RepeatGrid, BooleanGroup } = require('scenegraph');
+const { extractTextProperties, extractBackgroundProperties } = require('./helper-extractors.js');
+const { UIHelper, copyToClipboard } = require('../utils/helper.js');
+const { ACCEPTABLE_CSS_VALUES } = require('../utils/const.js');
+
 let scssPanel;
 
 /**
@@ -236,95 +237,6 @@ function displaySCSS(scss) {
     container.innerHTML = highlightedCode;
 }
 
-/**
- * Format of Typography properties in SCSS:
- * ----------------------------------------
- * font-family: <variable-name>;
- * font-weight: <variable-name>;
- * font-size: <variable-name>;
- * color: <variable-name>;
- * line-height: <pixel-value>;
- * letter-spacing: <pixel-value>;
- * text-align: <left/center/right/justify>;
- * text-decoration: <underline/line-through/none>;
- * text-transform: <uppercase/lowercase/capitalize/none>;
- */
-function extractTextProperties(textItem) {
-    const properties = {};
-
-    // -------------------------------------------------------------
-    // Font Family
-    // -------------------------------------------------------------
-    const fontFamily = textItem.fontFamily.toLowerCase();
-    properties.fontFamily = SCSS_VARIABLE_MAP.fontFamily[fontFamily];
-
-    // -------------------------------------------------------------
-    // Font Weight (aka fontStyle in XD)
-    // -------------------------------------------------------------
-    const fontStyle = (textItem.fontStyle || 'Regular').toLowerCase();
-    properties.fontWeight = SCSS_VARIABLE_MAP.fontWeight[fontStyle];
-
-    // -------------------------------------------------------------
-    // Font Size
-    // -------------------------------------------------------------
-    const fontSize = textItem.fontSize ?? 14;
-    properties.fontSize = SCSS_VARIABLE_MAP.fontSize[fontSize] || `${fontSize}px`;
-
-    // -------------------------------------------------------------
-    // Color
-    // -------------------------------------------------------------
-    let colorValue = '#000000';
-    if (textItem.fill && textItem.fill.constructor.name === 'Color') {
-        colorValue = rgbToHex(textItem.fill).toLowerCase();
-    }
-    properties.color = SCSS_VARIABLE_MAP.fontColor[colorValue] || SCSS_VARIABLE_MAP.color[colorValue] || colorValue;
-
-    // -------------------------------------------------------------
-    // Line Height
-    // -------------------------------------------------------------
-    const localBounds = textItem.localBounds;
-    const lineSpacing = textItem.lineSpacing || localBounds.height || 0;
-    if (lineSpacing > 0) properties.lineHeight = `${lineSpacing}px`;
-    else properties.lineHeight = 'normal';
-
-    // -------------------------------------------------------------
-    // Letter Spacing (charSpacing is in 1/1000th of font size)
-    // -------------------------------------------------------------
-    const charSpacing = textItem.charSpacing || 0;
-    if (charSpacing !== 0) {
-        // Convert from 1/1000th of font size to pixels
-        const letterSpacingPx = (charSpacing * fontSize) / 1000;
-        properties.letterSpacing = `${letterSpacingPx.toFixed(2)}px`;
-    }
-
-    // -------------------------------------------------------------
-    // Text Align (Mostly incorrect, hence depends on user to set it correctly)
-    // -------------------------------------------------------------
-    // properties.textAlign = textItem.textAlign || 'left';
-
-    // -------------------------------------------------------------
-    // Text Decoration - Check for underline and strikethrough
-    // -------------------------------------------------------------
-    if (textItem.underline && textItem.strikethrough) properties.textDecoration = 'underline line-through';
-    else if (textItem.underline) properties.textDecoration = 'underline';
-    else if (textItem.strikethrough) properties.textDecoration = 'line-through';
-    else properties.textDecoration = 'none';
-
-    // -------------------------------------------------------------
-    // Text Transform
-    // -------------------------------------------------------------
-    if (textItem.textTransform === 'titlecase') properties.textTransform = 'capitalize';
-    else properties.textTransform = textItem.textTransform || 'none';
-
-    // -------------------------------------------------------------
-    // Display Extracted Properties
-    // -------------------------------------------------------------
-    const elementName = textItem.name || 'text-element';
-    displayProperties(properties, elementName);
-
-    return properties;
-}
-
 function generateTextSCSS(properties) {
     let scss = '';
 
@@ -363,101 +275,6 @@ function generateTextSCSS(properties) {
     displaySCSS(scss);
 
     return scss;
-}
-
-/**
- * Format of Background properties in SCSS:
- * ----------------------------------------
- * width: <pixel-value>;
- * height: <pixel-value>;
- * border: <pixel-value> solid <variable-name>;
- * border-radius: <variable-name>;
- * background-color: <variable-name>;
- * box-shadow: <x> <y> <blur> <spread> <color>;
- */
-function extractBackgroundProperties(shapeItem) {
-    const properties = {};
-
-    // -------------------------------------------------------------
-    // Dimensions
-    // -------------------------------------------------------------
-    const bounds = shapeItem.localBounds;
-    properties.width = `${Math.round(bounds.width)}px`;
-    properties.height = `${Math.round(bounds.height)}px`;
-
-    // -------------------------------------------------------------
-    // Border (stroke properties)
-    // -------------------------------------------------------------
-    if (
-        shapeItem.stroke &&
-        shapeItem.stroke.constructor.name === 'Color' &&
-        shapeItem.strokeEnabled !== false &&
-        (shapeItem.strokeWidth || 0) > 0
-    ) {
-        const strokeColor = rgbToHex(shapeItem.stroke).toLowerCase();
-        const strokeWidth = shapeItem.strokeWidth || 1;
-        const strokeColorVar = SCSS_VARIABLE_MAP.color[strokeColor] || strokeColor;
-        properties.border = `${strokeWidth}px solid ${strokeColorVar}`;
-    }
-
-    // -------------------------------------------------------------
-    // Border Radius (for Rectangle elements)
-    // -------------------------------------------------------------
-    if (shapeItem instanceof Rectangle && shapeItem.cornerRadii) {
-        const radii = shapeItem.cornerRadii;
-        // Check if all corners have the same radius
-        if (
-            radii.topLeft === radii.topRight &&
-            radii.topRight === radii.bottomRight &&
-            radii.bottomRight === radii.bottomLeft
-        ) {
-            if (radii.topLeft > 0) {
-                const radius = `${radii.topLeft}px`;
-                properties.borderRadius = SCSS_VARIABLE_MAP.borderRadius[radius] || radius;
-            }
-        } else {
-            // Different corner radii
-            properties.borderRadius = `${radii.topLeft}px ${radii.topRight}px ${radii.bottomRight}px ${radii.bottomLeft}px`;
-        }
-    } else if (shapeItem instanceof Ellipse) {
-        properties.borderRadius = SCSS_VARIABLE_MAP.borderRadius['50%'];
-    }
-
-    // -------------------------------------------------------------
-    // Background Color (from fill property)
-    // -------------------------------------------------------------
-    if (shapeItem.fill && shapeItem.fill.constructor.name === 'Color') {
-        const colorValue = rgbToHex(shapeItem.fill).toLowerCase();
-        properties.backgroundColor =
-            SCSS_VARIABLE_MAP.bgColor[colorValue] || SCSS_VARIABLE_MAP.color[colorValue] || colorValue;
-    }
-
-    // -------------------------------------------------------------
-    // Box Shadow (from shadow property)
-    // -------------------------------------------------------------
-    if (shapeItem.shadow && shapeItem.shadow.visible !== false) {
-        const shadow = shapeItem.shadow;
-        const x = shadow.x || 0;
-        const y = shadow.y || 0;
-        const blur = shadow.blur || 0;
-        const spread = 0; // XD doesn't have spread, default to 0
-
-        // Extract shadow color
-        let shadowColor = '#0000001a'; // default (rgba(0, 0, 0, 0.1) as hex with alpha)
-        if (shadow.color && shadow.color.constructor.name === 'Color') {
-            shadowColor = rgbaToHex(shadow.color).toLowerCase();
-        }
-
-        properties.boxShadow = `${x}px ${y}px ${blur}px ${spread}px ${shadowColor}`;
-    }
-
-    // -------------------------------------------------------------
-    // Display Extracted Properties
-    // -------------------------------------------------------------
-    const elementName = shapeItem.name || `${shapeItem.constructor.name.toLowerCase()}-element`;
-    displayProperties(properties, elementName);
-
-    return properties;
 }
 
 function generateBackgroundSCSS(properties) {
@@ -517,12 +334,12 @@ function update() {
     // Handle different types of XD Nodes / Elements
     switch (selectedItem.constructor.name) {
         case 'Text': {
-            generateTextSCSS(extractTextProperties(selectedItem));
+            generateTextSCSS(extractTextProperties(selectedItem, displayProperties));
             break;
         }
         case 'Rectangle':
         case 'Ellipse': {
-            generateBackgroundSCSS(extractBackgroundProperties(selectedItem));
+            generateBackgroundSCSS(extractBackgroundProperties(selectedItem, displayProperties));
             break;
         }
         default: {

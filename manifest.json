@@ -33,6 +33,12 @@
             "label": "Extract Design Spec in JSON",
             "panelId": "jsonDesignSpecExtractor",
             "shortcut": { "mac": "Ctrl+Shift+J" }
+        },
+        {
+            "type": "panel",
+            "label": "Design Info Extractor (for LLM)",
+            "panelId": "designInfoExtractor",
+            "shortcut": { "mac": "Ctrl+Shift+D" }
         }
     ]
 }
