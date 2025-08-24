@@ -243,11 +243,11 @@ function displaySCSS(scss) {
  * font-weight: <variable-name>;
  * font-size: <variable-name>;
  * color: <variable-name>;
- * line-height: 18px;
- * letter-spacing: 0.66px;
- * text-align: left;
- * text-decoration: none;
- * text-transform: uppercase;
+ * line-height: <pixel-value>;
+ * letter-spacing: <pixel-value>;
+ * text-align: <left/center/right/justify>;
+ * text-decoration: <underline/line-through/none>;
+ * text-transform: <uppercase/lowercase/capitalize/none>;
  */
 function extractTextProperties(textItem) {
     const properties = {};
@@ -368,9 +368,9 @@ function generateTextSCSS(properties) {
 /**
  * Format of Background properties in SCSS:
  * ----------------------------------------
- * width: 100px;
- * height: 50px;
- * border: 1px solid <variable-name>;
+ * width: <pixel-value>;
+ * height: <pixel-value>;
+ * border: <pixel-value> solid <variable-name>;
  * border-radius: <variable-name>;
  * background-color: <variable-name>;
  */
@@ -385,9 +385,12 @@ function extractBackgroundProperties(shapeItem) {
     properties.height = `${Math.round(bounds.height)}px`;
 
     // -------------------------------------------------------------
-    // Border (stroke properties) (TODO :: check this)
+    // Border (stroke properties)
     // -------------------------------------------------------------
-    if (shapeItem.stroke && shapeItem.stroke.constructor.name === 'Color') {
+    if (shapeItem.stroke && 
+        shapeItem.stroke.constructor.name === 'Color' && 
+        shapeItem.strokeEnabled !== false && 
+        (shapeItem.strokeWidth || 0) > 0) {
         const strokeColor = rgbToHex(shapeItem.stroke).toLowerCase();
         const strokeWidth = shapeItem.strokeWidth || 1;
         const strokeColorVar = SCSS_VARIABLE_MAP.color[strokeColor] || strokeColor;

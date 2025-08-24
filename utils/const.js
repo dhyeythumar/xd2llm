@@ -10,9 +10,10 @@ const SCSS_VARIABLE_MAP = {
         '#000000': '$color-black',
     },
     borderRadius: {
-        '4px': '$border-radius-4',
-        '6px': '$border-radius-6',
-        '50%': '$border-radius-50',
+        '4px': '$border-radius-sm',
+        '6px': '$border-radius-md',
+        '8px': '$border-radius-lg',
+        '50%': '$border-radius-circle',
     },
     bgColor: {
         '#e1e8e7': '$bg-color-primary',
