@@ -14,6 +14,22 @@ function rgbToHex(fill) {
     );
 }
 
+function rgbaToHex(fill) {
+    // XD color values: ALL values (r, g, b, a) are in 0-255 range
+    const r = Math.round(fill.r);
+    const g = Math.round(fill.g);
+    const b = Math.round(fill.b);
+    const a = Math.round(fill.a); // Alpha is already in 0-255 range, no conversion needed
+
+    // Convert each component to hex and pad with zeros if needed
+    const rHex = r.toString(16).padStart(2, '0');
+    const gHex = g.toString(16).padStart(2, '0');
+    const bHex = b.toString(16).padStart(2, '0');
+    const aHex = a.toString(16).padStart(2, '0');
+
+    return `#${rHex}${gHex}${bHex}${aHex}`;
+}
+
 function copyToClipboard(event, contentId) {
     const content = document.querySelector(contentId);
     if (!content.textContent) return;
@@ -35,5 +51,6 @@ function copyToClipboard(event, contentId) {
 module.exports = {
     UIHelper,
     rgbToHex,
+    rgbaToHex,
     copyToClipboard,
 };

@@ -1,4 +1,4 @@
-const { UIHelper, rgbToHex, copyToClipboard } = require('../utils/helper.js');
+const { UIHelper, rgbToHex, rgbaToHex, copyToClipboard } = require('../utils/helper.js');
 const { SCSS_VARIABLE_MAP, ACCEPTABLE_CSS_VALUES } = require('../utils/const.js');
 
 const { selection, Rectangle, Ellipse } = require('scenegraph');
@@ -373,6 +373,7 @@ function generateTextSCSS(properties) {
  * border: <pixel-value> solid <variable-name>;
  * border-radius: <variable-name>;
  * background-color: <variable-name>;
+ * box-shadow: <x> <y> <blur> <spread> <color>;
  */
 function extractBackgroundProperties(shapeItem) {
     const properties = {};
@@ -387,10 +388,12 @@ function extractBackgroundProperties(shapeItem) {
     // -------------------------------------------------------------
     // Border (stroke properties)
     // -------------------------------------------------------------
-    if (shapeItem.stroke && 
-        shapeItem.stroke.constructor.name === 'Color' && 
-        shapeItem.strokeEnabled !== false && 
-        (shapeItem.strokeWidth || 0) > 0) {
+    if (
+        shapeItem.stroke &&
+        shapeItem.stroke.constructor.name === 'Color' &&
+        shapeItem.strokeEnabled !== false &&
+        (shapeItem.strokeWidth || 0) > 0
+    ) {
         const strokeColor = rgbToHex(shapeItem.stroke).toLowerCase();
         const strokeWidth = shapeItem.strokeWidth || 1;
         const strokeColorVar = SCSS_VARIABLE_MAP.color[strokeColor] || strokeColor;
@@ -430,6 +433,25 @@ function extractBackgroundProperties(shapeItem) {
     }
 
     // -------------------------------------------------------------
+    // Box Shadow (from shadow property)
+    // -------------------------------------------------------------
+    if (shapeItem.shadow && shapeItem.shadow.visible !== false) {
+        const shadow = shapeItem.shadow;
+        const x = shadow.x || 0;
+        const y = shadow.y || 0;
+        const blur = shadow.blur || 0;
+        const spread = 0; // XD doesn't have spread, default to 0
+
+        // Extract shadow color
+        let shadowColor = '#0000001a'; // default (rgba(0, 0, 0, 0.1) as hex with alpha)
+        if (shadow.color && shadow.color.constructor.name === 'Color') {
+            shadowColor = rgbaToHex(shadow.color).toLowerCase();
+        }
+
+        properties.boxShadow = `${x}px ${y}px ${blur}px ${spread}px ${shadowColor}`;
+    }
+
+    // -------------------------------------------------------------
     // Display Extracted Properties
     // -------------------------------------------------------------
     const elementName = shapeItem.name || `${shapeItem.constructor.name.toLowerCase()}-element`;
@@ -456,6 +478,9 @@ function generateBackgroundSCSS(properties) {
     }
     if (properties.backgroundColor) {
         scss += `background-color: ${properties.backgroundColor};\n`;
+    }
+    if (properties.boxShadow) {
+        scss += `box-shadow: ${properties.boxShadow};\n`;
     }
 
     // -------------------------------------------------------------
