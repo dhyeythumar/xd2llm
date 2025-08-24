@@ -1,6 +1,5 @@
 const { show: showSCSS, hide: hideSCSS, update: updateSCSS } = require('./spec-extractor/scss.js');
 const { show: showJSON, hide: hideJSON, update: updateJSON } = require('./spec-extractor/json.js');
-const { quickSpecExtract } = require('./spec-extractor/json-inside-dialog.js');
 
 module.exports = {
     panels: {
@@ -18,4 +17,5 @@ module.exports = {
     commands: {
         quickSpecExtract,
     },
+    commands: {},
 };

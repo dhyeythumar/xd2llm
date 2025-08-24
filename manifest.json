@@ -33,11 +33,6 @@
             "label": "Extract Design Spec in JSON",
             "panelId": "jsonDesignSpecExtractor",
             "shortcut": { "mac": "Ctrl+Shift+J" }
-        },
-        {
-            "type": "menu",
-            "label": "Quick Spec Extract (Modal)",
-            "commandId": "quickSpecExtract"
         }
     ]
 }
