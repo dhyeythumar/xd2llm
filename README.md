@@ -85,3 +85,4 @@ npm run plugin:package
 ### References
 
 -   https://developer.adobe.com/xd/uxp/
+-   https://developer.adobe.com/xd/uxp/develop/reference/SceneNode/
