@@ -1,11 +1,3 @@
-const { selection } = require('scenegraph');
-
-const { extractTextProperties, extractBackgroundProperties } = require('./helper-extractors.js');
-const { UIHelper, copyToClipboard } = require('../utils/helper.js');
-const { ACCEPTABLE_CSS_VALUES } = require('../utils/const.js');
-
-let scssPanel;
-
 /**
  * - **Display & Layout**: Properties like: `display`, `position`, `top/right/bottom/left`, `flex`, `grid`, `z-index`, `overflow`, `visibility`.
  *
@@ -21,6 +13,15 @@ let scssPanel;
  *
  * - **Pseudo-elements & pseudo-classes**: Properties like: `::before`, `::after`, `:hover`, `:focus`, `:active`
  */
+
+const { selection } = require('scenegraph');
+
+const extractTextProperties = require('../extractors/text.js');
+const extractBackgroundProperties = require('../extractors/background.js');
+const { UIHelper, copyToClipboard } = require('../utils/helper.js');
+const { ACCEPTABLE_CSS_VALUES } = require('../utils/const.js');
+
+let scssPanel;
 
 function create() {
     scssPanel = document.createElement('div');

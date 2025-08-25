@@ -1,10 +1,3 @@
-const { selection, Text } = require('scenegraph');
-
-const { extractTextProperties, extractBackgroundProperties } = require('../spec-extractor/helper-extractors.js');
-const { UIHelper, copyToClipboard } = require('../utils/helper.js');
-
-let designPanel;
-
 /**
  * Design Info Extractor for LLM-powered React Component Generation
  *
@@ -18,6 +11,14 @@ let designPanel;
  * - Component hierarchy mapping
  * - Design system token mapping
  */
+
+const { selection, Text } = require('scenegraph');
+
+const extractTextProperties = require('../../extractors/text.js');
+const extractBackgroundProperties = require('../../extractors/background.js');
+const { UIHelper, copyToClipboard } = require('../../utils/helper.js');
+
+let designPanel;
 
 function create() {
     designPanel = document.createElement('div');

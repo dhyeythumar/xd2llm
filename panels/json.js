@@ -1,7 +1,7 @@
 const { UIHelper, rgbToHex, copyToClipboard } = require('../utils/helper.js');
 
 const { selection } = require('scenegraph');
-const { Rectangle, Text, Ellipse, Line, Path, Group, RepeatGrid, BooleanGroup } = require('scenegraph');
+const { Rectangle, Text, Ellipse } = require('scenegraph');
 let jsonPanel;
 
 function create() {
