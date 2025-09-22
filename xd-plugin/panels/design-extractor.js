@@ -365,17 +365,23 @@ function logMCPConnectionStatus() {
 
 function show(event) {
     logMCPConnectionStatus();
+    mcpConnector.handleSelectionChange(null);
+
     if (!designPanel) event.node.appendChild(create());
 }
 
 function hide() {
     logMCPConnectionStatus();
+    mcpConnector.handleSelectionChange(null);
+
     designPanel.remove();
     designPanel = null;
 }
 
 function update() {
     logMCPConnectionStatus();
+    mcpConnector.handleSelectionChange(null);
+
     if (!designPanel) return;
 
     const selectedItem = selection?.items?.[0];
@@ -386,10 +392,8 @@ function update() {
 
     // Extract design information recursively
     const designInfo = extractDesignInfo(selectedItem);
-    displayDesignInfo(designInfo);
-
-    // Send selection data to MCP server
     mcpConnector.handleSelectionChange(designInfo);
+    displayDesignInfo(designInfo);
 
     UIHelper.toggleSpecContent(designPanel, true);
 }
