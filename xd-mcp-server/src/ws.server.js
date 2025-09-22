@@ -11,7 +11,7 @@ import { EventEmitter } from 'events';
  * Does not store data - requests fresh data from XD plugin on demand.
  * Enforces single connection limit.
  */
-export default class WebSocketServer extends EventEmitter {
+export default class WSServer extends EventEmitter {
     constructor() {
         super();
 
@@ -41,11 +41,18 @@ export default class WebSocketServer extends EventEmitter {
         });
 
         this.app.get('/selection', async (_, res) => {
-            const selectedNodeData = await this.requestSelectionData();
-            res.json({
-                status: 'ok',
-                selectedNodeData,
-            });
+            try {
+                const selectedNodeData = await this.requestSelectionData();
+                res.json({
+                    status: 'ok',
+                    selectedNodeData,
+                });
+            } catch (error) {
+                res.status(500).json({
+                    status: 'error',
+                    message: error.message,
+                });
+            }
         });
     }
 
@@ -54,8 +61,8 @@ export default class WebSocketServer extends EventEmitter {
             try {
                 // Start HTTP server
                 this.httpServer = this.app.listen(port, () => {
-                    console.log(`XD MCP HTTP server listening on port ${port}`);
-                    this.setupWebSocketServer();
+                    console.info(`HTTP server listening on port ${port}`);
+                    this.setupWSServer();
                     resolve();
                 });
             } catch (error) {
@@ -64,7 +71,7 @@ export default class WebSocketServer extends EventEmitter {
         });
     }
 
-    setupWebSocketServer() {
+    setupWSServer() {
         // Setup WebSocket server for real-time communication
         this.wsServer = new WebSocketServer({ server: this.httpServer });
 
@@ -82,7 +89,7 @@ export default class WebSocketServer extends EventEmitter {
             this.xdConnection = ws;
             this.xdConnectionId = connectionId;
 
-            console.log(`XD plugin connected: ${connectionId} (${req.socket.remoteAddress})`);
+            console.info(`XD plugin connected: ${connectionId} (${req.socket.remoteAddress})`);
 
             ws.on('message', (message) => {
                 try {
@@ -94,9 +101,9 @@ export default class WebSocketServer extends EventEmitter {
             });
 
             ws.on('close', () => {
+                console.info(`XD plugin disconnected: ${connectionId}`);
                 this.xdConnection = null;
                 this.xdConnectionId = null;
-                console.log(`XD plugin disconnected: ${connectionId}`);
             });
 
             ws.on('error', (error) => {
@@ -119,15 +126,9 @@ export default class WebSocketServer extends EventEmitter {
     handleWebSocketMessage(connectionId, data) {
         switch (data.type) {
             case 'selection_data':
-                console.log(`Received selection data via WebSocket from ${connectionId}`);
+                console.info(`Received selection data via WebSocket from ${connectionId}`);
                 // Emit event for listeners to handle the response
                 this.emit('selection_data', data.payload);
-                break;
-
-            case 'connection_status':
-                console.log(`Received connection status via WebSocket from ${connectionId}`);
-                // Emit event for listeners to handle the response
-                this.emit('connection_status', data.payload);
                 break;
 
             case 'ping':
@@ -224,7 +225,7 @@ export default class WebSocketServer extends EventEmitter {
             // Close HTTP server
             if (this.httpServer) {
                 this.httpServer.close(() => {
-                    console.log('XD WebSocket server closed');
+                    console.info('XD WebSocket server closed');
                     resolve();
                 });
             } else {

@@ -2,11 +2,11 @@
     "name": "@dhyeythumar/xd-mcp-server",
     "version": "1.0.0",
     "description": "MCP server that bridges Adobe XD plugins with LLMs for design spec extraction",
-    "main": "src/server.js",
+    "main": "src/mcp.server.js",
     "type": "module",
     "scripts": {
-        "start": "node src/server.js",
-        "dev": "node --watch src/server.js",
+        "start": "node src/mcp.server.js",
+        "dev": "node --watch src/mcp.server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [

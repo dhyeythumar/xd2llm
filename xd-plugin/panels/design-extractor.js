@@ -355,23 +355,17 @@ function displayDesignInfo(designInfo) {
     designPanel.querySelector('#output').textContent = JSON.stringify(designInfo, null, 4);
 }
 
-function logMCPConnectionStatus() {
-    console.log('MCP Connection Status:', mcpConnector.isConnected, mcpConnector.connectionId);
-}
-
 // -------------------------------------------------------------
 // Panel Functions
 // -------------------------------------------------------------
 
 function show(event) {
-    logMCPConnectionStatus();
     mcpConnector.handleSelectionChange(null);
 
     if (!designPanel) event.node.appendChild(create());
 }
 
 function hide() {
-    logMCPConnectionStatus();
     mcpConnector.handleSelectionChange(null);
 
     designPanel.remove();
@@ -379,7 +373,6 @@ function hide() {
 }
 
 function update() {
-    logMCPConnectionStatus();
     mcpConnector.handleSelectionChange(null);
 
     if (!designPanel) return;

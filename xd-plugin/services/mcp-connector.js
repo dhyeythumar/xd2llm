@@ -5,11 +5,12 @@
  * communication for real-time updates.
  */
 
+const PING_INTERVAL = 10000;
+
 class XDMCPConnector {
     constructor(options = {}) {
         this.serverUrl = options.serverUrl || 'http://localhost:6000';
         this.wsUrl = options.wsUrl || 'ws://localhost:6000';
-        this.autoConnect = options.autoConnect !== false;
         this.reconnectInterval = options.reconnectInterval || 5000;
         this.maxReconnectAttempts = options.maxReconnectAttempts || 10;
 
@@ -23,7 +24,7 @@ class XDMCPConnector {
         // Bind methods to preserve 'this' context
         this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
-        if (this.autoConnect) this.connect();
+        this.connect();
     }
 
     /**
@@ -35,11 +36,11 @@ class XDMCPConnector {
         }
 
         try {
-            console.log('Connecting to XD MCP Server...');
+            console.info('Connecting to XD MCP Server...');
             this.ws = new WebSocket(this.wsUrl);
 
             this.ws.onopen = () => {
-                console.log('Connected to XD MCP Server');
+                console.info('Connected to XD MCP Server');
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
 
@@ -48,6 +49,7 @@ class XDMCPConnector {
                     clearTimeout(this.reconnectTimer);
                     this.reconnectTimer = null;
                 }
+                this.ping();
             };
 
             this.ws.onmessage = (event) => {
@@ -60,7 +62,7 @@ class XDMCPConnector {
             };
 
             this.ws.onclose = () => {
-                console.log('Disconnected from XD MCP Server');
+                console.info('Disconnected from XD MCP Server');
                 this.isConnected = false;
                 this.connectionId = null;
                 this.scheduleReconnect();
@@ -90,7 +92,7 @@ class XDMCPConnector {
         this.reconnectAttempts++;
         const delay = Math.min(this.reconnectInterval * this.reconnectAttempts, 30000);
 
-        console.log(`Scheduling reconnection attempt ${this.reconnectAttempts} in ${delay}ms`);
+        console.info(`Scheduling reconnection attempt ${this.reconnectAttempts} in ${delay}ms`);
 
         this.reconnectTimer = setTimeout(() => {
             this.reconnectTimer = null;
@@ -105,7 +107,7 @@ class XDMCPConnector {
         switch (data.type) {
             case 'welcome':
                 this.connectionId = data.connectionId;
-                console.log(`Received connection ID: ${this.connectionId}`);
+                console.info(`Received connection ID: ${this.connectionId}`);
                 break;
 
             case 'request_selection_data':
@@ -113,7 +115,7 @@ class XDMCPConnector {
                 break;
 
             case 'pong':
-                console.log('Received pong from server');
+                console.info('Received pong from server');
                 break;
 
             default:
@@ -121,23 +123,33 @@ class XDMCPConnector {
         }
     }
 
+    // Send message to connected XD plugin
+    sendMessage(message) {
+        if (this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message));
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Send current selection data to server
      */
     async sendCurrentSelection() {
         try {
-            if (this.isConnected && this.ws.readyState === WebSocket.OPEN && this.selectionData) {
-                // Send via WebSocket
-                const message = {
-                    type: 'selection_data',
-                    payload: this.selectionData,
-                    timestamp: Date.now(),
-                };
+            if (!this.selectionData) {
+                throw new Error('No selection data to send');
+            }
 
-                this.ws.send(JSON.stringify(message));
-                this.selectionData = null;
-            } else {
-                throw new Error('Not connected to MCP server');
+            // Send via WebSocket
+            const message = {
+                type: 'selection_data',
+                payload: this.selectionData,
+                timestamp: Date.now(),
+            };
+
+            if (!this.sendMessage(message)) {
+                throw new Error('Failed to send websocket message');
             }
         } catch (error) {
             console.error('Failed to send selection data:', error);
@@ -156,17 +168,17 @@ class XDMCPConnector {
      */
     ping() {
         setInterval(() => {
-            if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(
-                    JSON.stringify({
-                        type: 'ping',
-                        timestamp: Date.now(),
-                    })
-                );
+            const message = {
+                type: 'ping',
+                timestamp: Date.now(),
+            };
+
+            if (this.sendMessage(message)) {
+                console.info('Sent ping to MCP server');
             } else {
-                console.warn('Not connected to MCP server');
+                console.warn('Failed to send ping to MCP server');
             }
-        }, 5000);
+        }, PING_INTERVAL);
     }
 
     /**

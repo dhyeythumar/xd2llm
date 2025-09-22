@@ -3,7 +3,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import WebSocketServer from './ws.server.js';
+import WSServer from './ws.server.js';
 
 /**
  * XD MCP Server - Bridge between Adobe XD plugins and LLMs
@@ -27,7 +27,7 @@ class XDMCPServer {
         );
 
         // WebSocket server for XD plugin communication
-        this.wsServer = new WebSocketServer();
+        this.wsServer = new WSServer();
 
         this.setupMCPTools();
         this.setupErrorHandling();
@@ -142,11 +142,9 @@ class XDMCPServer {
         };
 
         process.on('SIGINT', async () => {
-            console.log('Shutting down XD MCP Server...');
+            console.info('Shutting down XD MCP Server...');
 
-            // Close WebSocket server
             await this.wsServer.close();
-
             await this.mcpServer.close();
             process.exit(0);
         });
