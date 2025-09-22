@@ -18,10 +18,10 @@ class XDMCPConnector {
         this.reconnectAttempts = 0;
         this.reconnectTimer = null;
         this.connectionId = null;
+        this.selectionData = null;
 
         // Bind methods to preserve 'this' context
         this.handleSelectionChange = this.handleSelectionChange.bind(this);
-        // this.sendSelectionData = this.sendSelectionData.bind(this);
 
         if (this.autoConnect) this.connect();
     }
@@ -102,18 +102,18 @@ class XDMCPConnector {
      * Handle messages from MCP server
      */
     handleServerMessage(data) {
-        // TODO :: check this
         switch (data.type) {
             case 'welcome':
                 this.connectionId = data.connectionId;
                 console.log(`Received connection ID: ${this.connectionId}`);
+                break;
 
-                // Send initial selection data if available
-                this.sendCurrentSelection(); // TODO :: check this
+            case 'request_selection_data':
+                this.sendCurrentSelection();
                 break;
 
             case 'pong':
-                // Handle pong response if needed
+                console.log('Received pong from server');
                 break;
 
             default:
@@ -124,94 +124,49 @@ class XDMCPConnector {
     /**
      * Send current selection data to server
      */
-    async sendCurrentSelection(selectionData, requestId = null) {
+    async sendCurrentSelection() {
         try {
-            if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
+            if (this.isConnected && this.ws.readyState === WebSocket.OPEN && this.selectionData) {
                 // Send via WebSocket
                 const message = {
                     type: 'selection_data',
-                    payload: selectionData,
-                    requestId,
+                    payload: this.selectionData,
                     timestamp: Date.now(),
                 };
 
                 this.ws.send(JSON.stringify(message));
+                this.selectionData = null;
             } else {
-                // Fallback to HTTP
-                await this.sendViaHTTP(selectionData, requestId);
+                throw new Error('Not connected to MCP server');
             }
         } catch (error) {
             console.error('Failed to send selection data:', error);
-
-            // Send error message if this was a response to a request
-            if (requestId && this.isConnected && this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(
-                    JSON.stringify({
-                        type: 'error',
-                        message: error.message,
-                        requestId,
-                        timestamp: Date.now(),
-                    })
-                );
-            }
-        }
-    }
-
-    /**
-     * Send data via HTTP as fallback
-     */
-    async sendViaHTTP(selectionData, requestId = null) {
-        try {
-            const response = await fetch(`${this.serverUrl}/xd/selection`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    data: selectionData,
-                    requestId,
-                    timestamp: Date.now(),
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            console.log('Selection data sent via HTTP');
-        } catch (error) {
-            console.error('Failed to send data via HTTP:', error);
-            throw error;
         }
     }
 
     /**
      * Handle selection change events from XD
-     * Call this method when selection changes in your XD plugin
      */
     handleSelectionChange(selectionData) {
-        // Debounce selection changes to avoid too many updates
-        if (this.selectionChangeTimer) {
-            clearTimeout(this.selectionChangeTimer);
-        }
-
-        this.selectionChangeTimer = setTimeout(() => {
-            this.sendCurrentSelection(selectionData);
-        }, 100);
+        this.selectionData = selectionData;
     }
 
     /**
      * Send ping to server to check connection
      */
     ping() {
-        if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(
-                JSON.stringify({
-                    type: 'ping',
-                    timestamp: Date.now(),
-                })
-            );
-        }
+        setInterval(() => {
+            if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
+                this.ws.send(
+                    JSON.stringify({
+                        type: 'ping',
+                        timestamp: Date.now(),
+                    })
+                );
+            } else {
+                console.warn('Not connected to MCP server');
+            }
+        }, 5000);
     }
 
     /**
