@@ -1,3 +1,5 @@
+// TODO :: deprecated, remove this
+
 const { UIHelper, rgbToHex, copyToClipboard } = require('../utils/helper.js');
 
 const { selection } = require('scenegraph');

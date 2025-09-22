@@ -2,3 +2,4 @@ README.md
 package.json
 package-lock.json
 LICENSE
+node_modules

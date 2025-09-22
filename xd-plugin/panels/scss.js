@@ -242,24 +242,12 @@ function generateTextSCSS(properties) {
     let scss = '';
 
     // Add properties in the order specified in comments
-    if (properties.fontFamily) {
-        scss += `font-family: ${properties.fontFamily};\n`;
-    }
-    if (properties.fontWeight) {
-        scss += `font-weight: ${properties.fontWeight};\n`;
-    }
-    if (properties.fontSize) {
-        scss += `font-size: ${properties.fontSize};\n`;
-    }
-    if (properties.color) {
-        scss += `color: ${properties.color};\n`;
-    }
-    if (properties.lineHeight) {
-        scss += `line-height: ${properties.lineHeight};\n`;
-    }
-    if (properties.letterSpacing) {
-        scss += `letter-spacing: ${properties.letterSpacing};\n`;
-    }
+    if (properties.fontFamily) scss += `font-family: ${properties.fontFamily};\n`;
+    if (properties.fontWeight) scss += `font-weight: ${properties.fontWeight};\n`;
+    if (properties.fontSize) scss += `font-size: ${properties.fontSize};\n`;
+    if (properties.color) scss += `color: ${properties.color};\n`;
+    if (properties.lineHeight) scss += `line-height: ${properties.lineHeight};\n`;
+    if (properties.letterSpacing) scss += `letter-spacing: ${properties.letterSpacing};\n`;
     // if (properties.textAlign && properties.textAlign !== 'left') {
     //     scss += `text-align: ${properties.textAlign};\n`;
     // }
@@ -282,24 +270,12 @@ function generateBackgroundSCSS(properties) {
     let scss = '';
 
     // Add properties in logical order for CSS
-    if (properties.width) {
-        scss += `width: ${properties.width};\n`;
-    }
-    if (properties.height) {
-        scss += `height: ${properties.height};\n`;
-    }
-    if (properties.border) {
-        scss += `border: ${properties.border};\n`;
-    }
-    if (properties.borderRadius) {
-        scss += `border-radius: ${properties.borderRadius};\n`;
-    }
-    if (properties.backgroundColor) {
-        scss += `background-color: ${properties.backgroundColor};\n`;
-    }
-    if (properties.boxShadow) {
-        scss += `box-shadow: ${properties.boxShadow};\n`;
-    }
+    if (properties.width) scss += `width: ${properties.width};\n`;
+    if (properties.height) scss += `height: ${properties.height};\n`;
+    if (properties.border) scss += `border: ${properties.border};\n`;
+    if (properties.borderRadius) scss += `border-radius: ${properties.borderRadius};\n`;
+    if (properties.backgroundColor) scss += `background-color: ${properties.backgroundColor};\n`;
+    if (properties.boxShadow) scss += `box-shadow: ${properties.boxShadow};\n`;
 
     // -------------------------------------------------------------
     // Display the SCSS code

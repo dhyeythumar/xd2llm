@@ -1,0 +1,34 @@
+{
+    "name": "@dhyeythumar/xd-mcp-server",
+    "version": "1.0.0",
+    "description": "MCP server that bridges Adobe XD plugins with LLMs for design spec extraction",
+    "main": "src/server.js",
+    "type": "module",
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "node --watch src/server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "mcp",
+        "adobe-xd",
+        "design-specs",
+        "llm",
+        "bridge"
+    ],
+    "author": "Dhyey Thumar",
+    "license": "MIT",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^0.6.0",
+        "ws": "^8.18.0",
+        "express": "^4.21.1",
+        "cors": "^2.8.5",
+        "uuid": "^10.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.0"
+    },
+    "engines": {
+        "node": ">=22.0.0"
+    }
+}

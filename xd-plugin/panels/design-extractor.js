@@ -14,10 +14,13 @@
 
 const { selection, Text } = require('scenegraph');
 
-const extractTextProperties = require('../../extractors/text.js');
-const extractBackgroundProperties = require('../../extractors/background.js');
-const { UIHelper, copyToClipboard } = require('../../utils/helper.js');
+const extractTextProperties = require('../extractors/text.js');
+const extractBackgroundProperties = require('../extractors/background.js');
+const { UIHelper, copyToClipboard } = require('../utils/helper.js');
+const XDMCPConnector = require('../services/mcp-connector.js');
 
+// Initialize MCP connector
+const mcpConnector = new XDMCPConnector();
 let designPanel;
 
 function create() {
@@ -206,6 +209,7 @@ function extractDesignInfo(node, depth = 0, parentBounds = null) {
     };
 
     // Recursively extract children for groups
+    // TODO :: check the issue with specific check of group nodes
     if (info.semanticType === 'GROUP' && node.children && node.children.length > 0) {
         info.childCount = node.children.length;
         info.children = node.children.map((child) => extractDesignInfo(child, depth + 1, node.globalBounds));
@@ -351,20 +355,27 @@ function displayDesignInfo(designInfo) {
     designPanel.querySelector('#output').textContent = JSON.stringify(designInfo, null, 4);
 }
 
+function logMCPConnectionStatus() {
+    console.log('MCP Connection Status:', mcpConnector.isConnected, mcpConnector.connectionId);
+}
+
 // -------------------------------------------------------------
 // Panel Functions
 // -------------------------------------------------------------
 
 function show(event) {
+    logMCPConnectionStatus();
     if (!designPanel) event.node.appendChild(create());
 }
 
 function hide() {
+    logMCPConnectionStatus();
     designPanel.remove();
     designPanel = null;
 }
 
 function update() {
+    logMCPConnectionStatus();
     if (!designPanel) return;
 
     const selectedItem = selection?.items?.[0];
@@ -376,6 +387,9 @@ function update() {
     // Extract design information recursively
     const designInfo = extractDesignInfo(selectedItem);
     displayDesignInfo(designInfo);
+
+    // Send selection data to MCP server
+    mcpConnector.handleSelectionChange(designInfo);
 
     UIHelper.toggleSpecContent(designPanel, true);
 }
