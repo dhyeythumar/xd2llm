@@ -1,7 +1,8 @@
 /**
- * Map of XD property values to SCSS variables
+ * Map of XD property values to Style variables
+ * This helps to generate variables for your design tokens.
  */
-const SCSS_VARIABLE_MAP = {
+const STYLE_VARIABLES = {
     color: {
         '#667980': '$color-slate',
         '#8fb98f': '$color-sage',
@@ -57,8 +58,9 @@ const SCSS_VARIABLE_MAP = {
 
 /**
  * Map of XD property values to CSS values
+ * In some cases, XD refer to its own values which doesn't have a CSS equivalent.
  */
-const CSS_VALUE_MAP = {};
+const CSS_VALUES = {};
 
 const ACCEPTABLE_CSS_VALUES = {
     textDecoration: ['underline', 'line-through'],
@@ -66,7 +68,7 @@ const ACCEPTABLE_CSS_VALUES = {
 };
 
 module.exports = {
-    SCSS_VARIABLE_MAP,
-    CSS_VALUE_MAP,
+    STYLE_VARIABLES,
+    CSS_VALUES,
     ACCEPTABLE_CSS_VALUES,
 };

@@ -14,10 +14,13 @@
 
 const { selection, Text } = require('scenegraph');
 
-const extractTextProperties = require('../../extractors/text.js');
-const extractBackgroundProperties = require('../../extractors/background.js');
-const { UIHelper, copyToClipboard } = require('../../utils/helper.js');
+const extractTextProperties = require('../extractors/text.js');
+const extractBackgroundProperties = require('../extractors/background.js');
+const { UIHelper, copyToClipboard } = require('../utils/helper.js');
+const XDMCPConnector = require('../services/mcp-connector.js');
 
+// Initialize MCP connector
+const mcpConnector = new XDMCPConnector();
 let designPanel;
 
 function create() {
@@ -206,7 +209,7 @@ function extractDesignInfo(node, depth = 0, parentBounds = null) {
     };
 
     // Recursively extract children for groups
-    if (info.semanticType === 'GROUP' && node.children && node.children.length > 0) {
+    if (info.nodeType === 'GROUP' && node.children && node.children.length > 0) {
         info.childCount = node.children.length;
         info.children = node.children.map((child) => extractDesignInfo(child, depth + 1, node.globalBounds));
     }
@@ -261,6 +264,8 @@ function extractVisualProperties(node, parentBounds = null) {
             width: Math.round(node.localBounds.width),
             height: Math.round(node.localBounds.height),
         },
+        typography: null,
+        background: null,
     };
 
     switch (node.constructor.name) {
@@ -356,15 +361,21 @@ function displayDesignInfo(designInfo) {
 // -------------------------------------------------------------
 
 function show(event) {
+    mcpConnector.handleSelectionChange(null);
+
     if (!designPanel) event.node.appendChild(create());
 }
 
 function hide() {
+    mcpConnector.handleSelectionChange(null);
+
     designPanel.remove();
     designPanel = null;
 }
 
 function update() {
+    mcpConnector.handleSelectionChange(null);
+
     if (!designPanel) return;
 
     const selectedItem = selection?.items?.[0];
@@ -375,6 +386,7 @@ function update() {
 
     // Extract design information recursively
     const designInfo = extractDesignInfo(selectedItem);
+    mcpConnector.handleSelectionChange(designInfo);
     displayDesignInfo(designInfo);
 
     UIHelper.toggleSpecContent(designPanel, true);

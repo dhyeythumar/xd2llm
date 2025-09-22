@@ -1,5 +1,5 @@
 const { rgbToHex } = require('../utils/helper.js');
-const { SCSS_VARIABLE_MAP } = require('../utils/const.js');
+const { STYLE_VARIABLES } = require('../utils/const.js');
 
 /**
  * Format of Typography properties in SCSS:
@@ -21,19 +21,19 @@ function extractTextProperties(textNode, displayFunction) {
     // Font Family
     // -------------------------------------------------------------
     const fontFamily = textNode.fontFamily.toLowerCase();
-    properties.fontFamily = SCSS_VARIABLE_MAP.fontFamily[fontFamily];
+    properties.fontFamily = STYLE_VARIABLES.fontFamily[fontFamily];
 
     // -------------------------------------------------------------
     // Font Weight (aka fontStyle in XD)
     // -------------------------------------------------------------
     const fontStyle = (textNode.fontStyle || 'Regular').toLowerCase();
-    properties.fontWeight = SCSS_VARIABLE_MAP.fontWeight[fontStyle];
+    properties.fontWeight = STYLE_VARIABLES.fontWeight[fontStyle];
 
     // -------------------------------------------------------------
     // Font Size
     // -------------------------------------------------------------
     const fontSize = textNode.fontSize ?? 14;
-    properties.fontSize = SCSS_VARIABLE_MAP.fontSize[fontSize] || `${fontSize}px`;
+    properties.fontSize = STYLE_VARIABLES.fontSize[fontSize] || `${fontSize}px`;
 
     // -------------------------------------------------------------
     // Color
@@ -42,7 +42,7 @@ function extractTextProperties(textNode, displayFunction) {
     if (textNode.fill && textNode.fill.constructor.name === 'Color') {
         colorValue = rgbToHex(textNode.fill).toLowerCase();
     }
-    properties.color = SCSS_VARIABLE_MAP.fontColor[colorValue] || SCSS_VARIABLE_MAP.color[colorValue] || colorValue;
+    properties.color = STYLE_VARIABLES.fontColor[colorValue] || STYLE_VARIABLES.color[colorValue] || colorValue;
 
     // -------------------------------------------------------------
     // Line Height

@@ -24,21 +24,15 @@
     "uiEntryPoints": [
         {
             "type": "panel",
-            "label": "Extract Design Spec in SCSS",
-            "panelId": "scssDesignSpecExtractor",
-            "shortcut": { "mac": "Ctrl+Shift+S" }
-        },
-        {
-            "type": "panel",
-            "label": "Extract Design Spec in JSON",
-            "panelId": "jsonDesignSpecExtractor",
-            "shortcut": { "mac": "Ctrl+Shift+J" }
-        },
-        {
-            "type": "panel",
-            "label": "Design Info Extractor (for LLM)",
+            "label": "Design Info Extractor (for LLMs)",
             "panelId": "designInfoExtractor",
             "shortcut": { "mac": "Ctrl+Shift+D" }
+        },
+        {
+            "type": "panel",
+            "label": "Design Specs in SCSS",
+            "panelId": "scssDesignSpecExtractor",
+            "shortcut": { "mac": "Ctrl+Shift+S" }
         }
     ]
 }
