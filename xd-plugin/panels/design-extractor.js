@@ -209,8 +209,7 @@ function extractDesignInfo(node, depth = 0, parentBounds = null) {
     };
 
     // Recursively extract children for groups
-    // TODO :: check the issue with specific check of group nodes
-    if (info.semanticType === 'GROUP' && node.children && node.children.length > 0) {
+    if (info.nodeType === 'GROUP' && node.children && node.children.length > 0) {
         info.childCount = node.children.length;
         info.children = node.children.map((child) => extractDesignInfo(child, depth + 1, node.globalBounds));
     }
@@ -265,6 +264,8 @@ function extractVisualProperties(node, parentBounds = null) {
             width: Math.round(node.localBounds.width),
             height: Math.round(node.localBounds.height),
         },
+        typography: null,
+        background: null,
     };
 
     switch (node.constructor.name) {
