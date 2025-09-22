@@ -3,6 +3,7 @@ import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'events';
+import logger from './logger.js';
 
 /**
  * WebSocket and HTTP Server for XD Plugin Communication
@@ -61,7 +62,7 @@ export default class WSServer extends EventEmitter {
             try {
                 // Start HTTP server
                 this.httpServer = this.app.listen(port, () => {
-                    console.info(`HTTP server listening on port ${port}`);
+                    logger.server('http-ready', `HTTP server listening on port ${port}`);
                     this.setupWSServer();
                     resolve();
                 });
@@ -78,9 +79,7 @@ export default class WSServer extends EventEmitter {
         this.wsServer.on('connection', (ws, req) => {
             // Check if we already have a connection
             if (this.xdConnection) {
-                console.warn(
-                    `Rejecting additional XD plugin connection from ${req.socket.remoteAddress} - only one connection allowed`
-                );
+                logger.connection('rejected', 'additional-connection', `from ${req.socket.remoteAddress} - only one connection allowed`);
                 ws.close(1008, 'Only one XD plugin connection allowed');
                 return;
             }
@@ -89,25 +88,25 @@ export default class WSServer extends EventEmitter {
             this.xdConnection = ws;
             this.xdConnectionId = connectionId;
 
-            console.info(`XD plugin connected: ${connectionId} (${req.socket.remoteAddress})`);
+            logger.connection('established', connectionId, `from ${req.socket.remoteAddress}`);
 
             ws.on('message', (message) => {
                 try {
                     const data = JSON.parse(message.toString());
                     this.handleWebSocketMessage(connectionId, data);
                 } catch (error) {
-                    console.error(`Error parsing WebSocket message from ${connectionId}:`, error);
+                    logger.ws('parse-error', connectionId, error.message);
                 }
             });
 
             ws.on('close', () => {
-                console.info(`XD plugin disconnected: ${connectionId}`);
+                logger.connection('closed', connectionId);
                 this.xdConnection = null;
                 this.xdConnectionId = null;
             });
 
             ws.on('error', (error) => {
-                console.error(`WebSocket error for connection ${connectionId}:`, error);
+                logger.ws('error', connectionId, error.message);
                 this.xdConnection = null;
                 this.xdConnectionId = null;
             });
@@ -126,12 +125,13 @@ export default class WSServer extends EventEmitter {
     handleWebSocketMessage(connectionId, data) {
         switch (data.type) {
             case 'selection_data':
-                console.info(`Received selection data via WebSocket from ${connectionId}`);
+                logger.ws('received', connectionId, `selection_data message`);
                 // Emit event for listeners to handle the response
                 this.emit('selection_data', data.payload);
                 break;
 
             case 'ping':
+                logger.ws('ping', connectionId);
                 this.sendMessage({
                     type: 'pong',
                     connectionId,
@@ -140,13 +140,13 @@ export default class WSServer extends EventEmitter {
                 break;
 
             case 'error':
-                console.error(`Error from XD plugin ${connectionId}:`, data.message);
+                logger.ws('received-error', connectionId, data.message);
                 // Emit error event
                 this.emit('xd_error', new Error(data.message));
                 break;
 
             default:
-                console.warn(`Unknown message type from ${connectionId}:`, data.type);
+                logger.ws('unknown-message', connectionId, `type: ${data.type}`);
         }
     }
 
@@ -170,11 +170,14 @@ export default class WSServer extends EventEmitter {
             timestamp: Date.now(),
         };
 
+        logger.ws('sending', this.xdConnectionId, `request_selection_data message`);
+
         return new Promise((resolve, reject) => {
             // Set up timeout
             const timeoutId = setTimeout(() => {
                 this.removeListener('selection_data', onSelectionData);
                 this.removeListener('xd_error', onError);
+                logger.ws('timeout', this.xdConnectionId, `selection_data request after ${timeout}ms`);
                 reject(new Error('Selection data request timeout'));
             }, timeout);
 
@@ -182,12 +185,14 @@ export default class WSServer extends EventEmitter {
             const onSelectionData = (data) => {
                 clearTimeout(timeoutId);
                 this.removeListener('xd_error', onError);
+                logger.ws('response-received', this.xdConnectionId, 'selection_data received successfully');
                 resolve(data);
             };
 
             const onError = (error) => {
                 clearTimeout(timeoutId);
                 this.removeListener('selection_data', onSelectionData);
+                logger.ws('response-error', this.xdConnectionId, error.message);
                 reject(error);
             };
 
@@ -200,6 +205,7 @@ export default class WSServer extends EventEmitter {
                 clearTimeout(timeoutId);
                 this.removeListener('selection_data', onSelectionData);
                 this.removeListener('xd_error', onError);
+                logger.ws('send-failed', this.xdConnectionId, 'Failed to send message');
                 reject(new Error('Failed to send request to XD plugin'));
             }
         });
@@ -225,7 +231,7 @@ export default class WSServer extends EventEmitter {
             // Close HTTP server
             if (this.httpServer) {
                 this.httpServer.close(() => {
-                    console.info('XD WebSocket server closed');
+                    logger.server('closed', 'XD WebSocket server shutdown complete');
                     resolve();
                 });
             } else {

@@ -4,6 +4,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import WSServer from './ws.server.js';
+import logger from './logger.js';
 
 /**
  * XD MCP Server - Bridge between Adobe XD plugins and LLMs
@@ -50,7 +51,10 @@ class XDMCPServer {
                         name: 'get_selected_xd_node',
                         description:
                             'Get details of the currently selected node/element in Adobe XD. Returns comprehensive specifications including dimensions, visual properties, typography, and more.',
-                        inputSchema: {},
+                        inputSchema: {
+                            type: 'object',
+                            properties: {},
+                        },
                     },
                 ],
             };
@@ -58,15 +62,15 @@ class XDMCPServer {
 
         // Handle tool calls
         this.mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
-            const { name, arguments: args } = request.params;
+            const { name } = request.params;
 
             try {
                 switch (name) {
                     case 'get_xd_connection_status':
-                        return await this.handleGetConnectionStatus(args);
+                        return await this.handleGetConnectionStatus();
 
                     case 'get_selected_xd_node':
-                        return await this.handleGetSelectedNode(args);
+                        return await this.handleGetSelectedNode();
 
                     default:
                         throw new Error(`Unknown tool: ${name}`);
@@ -138,27 +142,36 @@ class XDMCPServer {
 
     setupErrorHandling() {
         this.mcpServer.onerror = (error) => {
-            console.error('[MCP Error]', error);
+            logger.error('MCP Server Error:', error);
         };
 
         process.on('SIGINT', async () => {
-            console.info('Shutting down XD MCP Server...');
+            logger.server('shutdown', 'Received SIGINT signal');
 
             await this.wsServer.close();
             await this.mcpServer.close();
+            logger.server('shutdown', 'Clean shutdown completed');
             process.exit(0);
         });
     }
 
     async start() {
-        // Start WebSocket server
-        const port = process.env.XD_MCP_PORT || 6000;
-        await this.wsServer.start(port);
+        try {
+            // Start WebSocket server
+            const port = process.env.XD_MCP_PORT || 6000;
+            logger.server('starting', `Initializing WebSocket server on port ${port}`);
+            await this.wsServer.start(port);
 
-        // Start MCP server
-        const transport = new StdioServerTransport();
-        await this.mcpServer.connect(transport);
-        console.error('XD MCP Server running on stdio');
+            // Start MCP server
+            logger.server('starting', 'Initializing MCP stdio transport');
+            const transport = new StdioServerTransport();
+            await this.mcpServer.connect(transport);
+
+            logger.server('ready', `XD MCP Server running on stdio with WebSocket on port ${port}`);
+        } catch (error) {
+            logger.error('Failed to start server:', error);
+            process.exit(1);
+        }
     }
 }
 
