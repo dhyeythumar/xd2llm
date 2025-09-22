@@ -1,5 +1,3 @@
-import express from 'express';
-import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'events';
@@ -16,70 +14,25 @@ export default class WSServer extends EventEmitter {
     constructor() {
         super();
 
+        this.wsServer = null;
+
         // Single connection tracking
         this.xdConnection = null;
         this.xdConnectionId = null;
-
-        // HTTP server setup
-        this.app = express();
-        this.httpServer = null;
-        this.wsServer = null;
-
-        this.setupHTTPServer();
     }
 
-    setupHTTPServer() {
-        this.app.use(cors());
-        this.app.use(express.json({ limit: '10mb' }));
-
-        // Health check endpoint
-        this.app.get('/health', (_, res) => {
-            res.json({
-                status: 'ok',
-                connected: this.isConnected(),
-                connectionId: this.getConnectionId(),
-            });
-        });
-
-        this.app.get('/selection', async (_, res) => {
-            try {
-                const selectedNodeData = await this.requestSelectionData();
-                res.json({
-                    status: 'ok',
-                    selectedNodeData,
-                });
-            } catch (error) {
-                res.status(500).json({
-                    status: 'error',
-                    message: error.message,
-                });
-            }
-        });
-    }
-
-    start(port = 6000) {
-        return new Promise((resolve, reject) => {
-            try {
-                // Start HTTP server
-                this.httpServer = this.app.listen(port, () => {
-                    logger.server('http-ready', `HTTP server listening on port ${port}`);
-                    this.setupWSServer();
-                    resolve();
-                });
-            } catch (error) {
-                reject(error);
-            }
-        });
-    }
-
-    setupWSServer() {
+    setupWSServer(httpServer) {
         // Setup WebSocket server for real-time communication
-        this.wsServer = new WebSocketServer({ server: this.httpServer });
+        this.wsServer = new WebSocketServer({ server: httpServer });
 
         this.wsServer.on('connection', (ws, req) => {
             // Check if we already have a connection
             if (this.xdConnection) {
-                logger.connection('rejected', 'additional-connection', `from ${req.socket.remoteAddress} - only one connection allowed`);
+                logger.connection(
+                    'rejected',
+                    'additional-connection',
+                    `from ${req.socket.remoteAddress} - only one connection allowed`
+                );
                 ws.close(1008, 'Only one XD plugin connection allowed');
                 return;
             }
@@ -220,23 +173,14 @@ export default class WSServer extends EventEmitter {
         return this.xdConnectionId;
     }
 
-    // Cleanup and shutdown
+    // Cleanup and shutdown websocket server
     close() {
         return new Promise((resolve) => {
-            // Close WebSocket connection
             if (this.xdConnection) {
                 this.xdConnection.close();
             }
-
-            // Close HTTP server
-            if (this.httpServer) {
-                this.httpServer.close(() => {
-                    logger.server('closed', 'XD WebSocket server shutdown complete');
-                    resolve();
-                });
-            } else {
-                resolve();
-            }
+            logger.ws('closed', this.xdConnectionId, 'WebSocket connection closed');
+            resolve();
         });
     }
 }
