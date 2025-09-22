@@ -1,6 +1,10 @@
 # XD MCP Server Setup Guide
 
-This guide will walk you through setting up the XD MCP Server to bridge Adobe XD with LLMs.
+> **📖 Documentation Structure**:
+> - **[README.md](README.md)**: Quick overview, features, architecture, and basic usage
+> - **SETUP.md** (this file): Detailed setup instructions, troubleshooting, and monitoring
+
+This guide provides comprehensive setup instructions for the XD MCP Server, which bridges Adobe XD with LLMs using an EventEmitter-based real-time architecture.
 
 ## 📋 Quick Start
 
@@ -38,7 +42,10 @@ Add to your Cursor MCP configuration:
     "mcpServers": {
         "xd-mcp-server": {
             "command": "node",
-            "args": ["/absolute/path/to/xd-mcp-server/src/server.js"]
+            "args": ["/absolute/path/to/xd-mcp-server/src/mcp.server.js"],
+            "env": {
+                "XD_MCP_PORT": "6000"
+            }
         }
     }
 }
@@ -57,9 +64,8 @@ Expected response:
 ```json
 {
     "status": "ok",
-    "connections": 0,
-    "hasData": false,
-    "lastUpdate": null
+    "connected": false,
+    "connectionId": null
 }
 ```
 
@@ -67,7 +73,7 @@ Expected response:
 
 1. Open Adobe XD
 2. Load your plugin
-3. Check the server health again - `connections` should be > 0
+3. Check the server health again - `connected` should be `true` and `connectionId` should show a UUID
 
 ### 3. Test MCP Tools
 
@@ -76,6 +82,16 @@ In your MCP client (Claude Desktop, Cursor, etc.), try:
 ```
 Check XD connection status
 Get the selected XD node details
+What are the properties of the selected element?
+```
+
+### 4. Test Direct Endpoints
+
+```bash
+# Test real-time selection endpoint
+curl http://localhost:6000/selection
+
+# This will either return selection data or an error if nothing is selected
 ```
 
 ## 🚨 Troubleshooting
@@ -121,8 +137,8 @@ Get the selected XD node details
 **Solutions:**
 
 1. Select an element in XD
-2. Try "Request updated selection data from XD"
-3. Check if selection change handler is properly connected
+2. Try the MCP tool again or test the `/selection` endpoint
+3. Check if selection change handler is properly connected in the XD plugin
 
 ## 📊 Monitoring
 
@@ -130,10 +146,11 @@ Get the selected XD node details
 
 The server logs important events:
 
--   XD plugin connections/disconnections
--   Selection data updates
--   MCP tool calls
--   Errors and warnings
+-   XD plugin connections/disconnections (`console.info`)
+-   Real-time selection data requests and responses
+-   MCP tool calls and results
+-   WebSocket events and errors
+-   EventEmitter events
 
 ### Health Endpoint
 
