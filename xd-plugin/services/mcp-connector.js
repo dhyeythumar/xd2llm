@@ -13,7 +13,7 @@ class XDMCPConnector {
         this.serverUrl = options.serverUrl || `http://localhost:${PORT}`;
         this.wsUrl = options.wsUrl || `ws://localhost:${PORT}`;
         this.reconnectInterval = options.reconnectInterval || 5000;
-        this.maxReconnectAttempts = options.maxReconnectAttempts || 10;
+        this.maxReconnectAttempts = options.maxReconnectAttempts || 5;
 
         this.ws = null;
         this.isConnected = false;
@@ -72,7 +72,7 @@ class XDMCPConnector {
                 console.info('Disconnected from XD MCP Server');
                 this.isConnected = false;
                 this.connectionId = null;
-                
+
                 // Notify UI about disconnection
                 this.notifyConnectionStatusChange(false, this.reconnectAttempts);
                 this.scheduleReconnect();
@@ -81,7 +81,7 @@ class XDMCPConnector {
             this.ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
                 this.isConnected = false;
-                
+
                 // Notify UI about error/disconnection
                 this.notifyConnectionStatusChange(false, this.reconnectAttempts);
             };
@@ -211,6 +211,37 @@ class XDMCPConnector {
                 console.warn('Failed to send ping to MCP server');
             }
         }, PING_INTERVAL);
+    }
+
+    /**
+     * Manually trigger reconnection (reset retry attempts and reconnect)
+     */
+    manualReconnect() {
+        console.info('Manual reconnection triggered');
+
+        // Reset retry attempts
+        this.reconnectAttempts = 0;
+
+        // Clear any existing reconnect timer
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+
+        // Close existing connection if any
+        if (this.ws) {
+            this.ws.close();
+            this.ws = null;
+        }
+
+        this.isConnected = false;
+        this.connectionId = null;
+
+        // Notify UI about the manual reconnection attempt
+        this.notifyConnectionStatusChange(false, 0);
+
+        // Start fresh connection
+        this.connect();
     }
 
     /**

@@ -102,14 +102,10 @@ function create() {
             }
             #copy-btn {
                 margin: 0;
-                padding: 4px 8px;
                 font-size: 11px;
-                border-radius: 3px;
                 color: white;
                 cursor: pointer;
                 font-weight: 500;
-                border: 1px solid #4a5568;
-                background: #4a5568;
             }
             #copy-btn:hover {
                 background: #2d3748;
@@ -195,12 +191,25 @@ function create() {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
             }
+            .retry-button {
+                margin: 0;
+                margin-left: 8px;
+                font-size: 10px; 
+                color: white;
+                cursor: pointer;
+                font-weight: 500;
+                display: none;
+            }
+            .retry-button.show {
+                display: inline-block;
+            }
         </style>
         
         <div class="design-container">
             <div id="connection-status" class="connection-status disconnected">
                 <div class="connection-dot disconnected"></div>
                 <span id="connection-text">Disconnected</span>
+                <button id="retry-button" class="retry-button" type="button">Retry</button>
             </div>
 
             <div id="spec-content" class="hide">
@@ -258,19 +267,21 @@ function updateConnectionStatus(isConnected, reconnectAttempts = 0) {
     const statusElement = designPanel.querySelector('#connection-status');
     const dotElement = designPanel.querySelector('.connection-dot');
     const textElement = designPanel.querySelector('#connection-text');
+    const retryButton = designPanel.querySelector('#retry-button');
 
-    if (!statusElement || !dotElement || !textElement) return;
+    if (!statusElement || !dotElement || !textElement || !retryButton) return;
 
     // Remove all status classes
     statusElement.classList.remove('connected', 'disconnected', 'reconnecting');
     dotElement.classList.remove('connected', 'disconnected', 'reconnecting');
+    retryButton.classList.remove('show');
 
     if (isConnected) {
         // Connected state
         statusElement.classList.add('connected');
         dotElement.classList.add('connected');
         textElement.textContent = 'Connected with MCP Server';
-    } else if (reconnectAttempts > 0) {
+    } else if (reconnectAttempts > 0 && reconnectAttempts < mcpConnector.maxReconnectAttempts) {
         // Reconnecting state
         statusElement.classList.add('reconnecting');
         dotElement.classList.add('reconnecting');
@@ -279,7 +290,15 @@ function updateConnectionStatus(isConnected, reconnectAttempts = 0) {
         // Disconnected state
         statusElement.classList.add('disconnected');
         dotElement.classList.add('disconnected');
-        textElement.textContent = 'Disconnected from MCP Server';
+
+        if (reconnectAttempts >= mcpConnector.maxReconnectAttempts) {
+            // Retries exhausted - show retry button
+            textElement.textContent = 'Connection failed - retries exhausted';
+            retryButton.classList.add('show');
+        } else {
+            // Initial disconnected state
+            textElement.textContent = 'Disconnected from MCP Server';
+        }
     }
 }
 
