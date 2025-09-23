@@ -23,6 +23,7 @@ class Server {
 
         this.httpServer = null;
         this.app = express();
+        this.connections = new Set(); // Track active connections
 
         // Server information
         this.currentPort = null;
@@ -127,6 +128,14 @@ class Server {
                         resolve();
                     });
 
+                    // Track connections for proper shutdown
+                    this.httpServer.on('connection', (socket) => {
+                        this.connections.add(socket);
+                        socket.on('close', () => {
+                            this.connections.delete(socket);
+                        });
+                    });
+
                     this.httpServer.on('error', (error) => {
                         reject(error);
                     });
@@ -140,19 +149,41 @@ class Server {
         }
     }
 
-    close() {
-        return new Promise(async (resolve) => {
-            await this.wsServer.close();
-
-            if (this.httpServer) {
-                this.httpServer.close(() => {
-                    logger.server('http-server-started', 'HTTP server shutdown complete');
-                    resolve();
-                });
-            } else {
-                resolve();
+    async close() {
+        try {
+            // Close WebSocket server first
+            if (this.wsServer) {
+                await this.wsServer.close();
             }
-        });
+
+            // Close HTTP server with timeout
+            if (this.httpServer) {
+                // First, destroy all existing connections
+                for (const socket of this.connections) {
+                    socket.destroy();
+                }
+                this.connections.clear();
+
+                // Close the server with a timeout
+                await Promise.race([
+                    new Promise((resolve) => {
+                        this.httpServer.close(() => {
+                            logger.server('http-closed', 'HTTP server closed successfully');
+                            resolve();
+                        });
+                    }),
+                    new Promise((resolve) => {
+                        setTimeout(() => {
+                            logger.warn('HTTP server close timeout, forcing shutdown');
+                            resolve();
+                        }, 2000); // 2 second timeout
+                    }),
+                ]);
+            }
+        } catch (error) {
+            logger.error('Error during server shutdown:', error);
+            // Don't throw error to allow process to exit
+        }
     }
 }
 
@@ -160,32 +191,48 @@ class Server {
 if (import.meta.url === `file://${process.argv[1]}`) {
     logger.info('Setting up server');
     const server = new Server();
-    const port = parseInt(process.env.XD_WS_PORT) || 6000;
 
-    // Setup graceful shutdown
-    process.on('SIGINT', async () => {
-        logger.server('shutdown', 'Received SIGINT signal');
-        await server.close();
-        process.exit(0);
-    });
+    let isShuttingDown = false;
 
-    process.on('SIGTERM', async () => {
-        logger.server('shutdown', 'Received SIGTERM signal');
-        await server.close();
-        process.exit(0);
-    });
+    // Graceful shutdown function
+    const gracefulShutdown = async (signal) => {
+        if (isShuttingDown) {
+            logger.warn('Already shutting down, forcing exit...');
+            process.exit(1);
+        }
 
-    process.on('uncaughtException', (error) => {
+        isShuttingDown = true;
+        logger.server('shutdown-start', `Starting server shutdown... (${signal})`);
+
+        try {
+            await server.close();
+            logger.server('shutdown-complete', 'Graceful shutdown completed');
+            process.exit(0);
+        } catch (error) {
+            logger.error('Error during graceful shutdown:', error);
+            process.exit(1);
+        }
+    };
+
+    // Setup graceful shutdown - only register once
+    process.once('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+    process.once('uncaughtException', (error) => {
         logger.error('Uncaught exception:', error);
-        process.exit(1);
+        gracefulShutdown('uncaughtException').catch(() => process.exit(1));
     });
 
-    process.on('unhandledRejection', (reason) => {
+    process.once('unhandledRejection', (reason) => {
         logger.error('Unhandled rejection:', reason);
-        process.exit(1);
+        gracefulShutdown('unhandledRejection').catch(() => process.exit(1));
     });
 
-    server.start(port);
+    // Start server
+    server.start(PORT).catch((error) => {
+        logger.error('Failed to start server:', error);
+        process.exit(1);
+    });
 }
 
 export default Server;

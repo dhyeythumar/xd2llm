@@ -178,11 +178,31 @@ export default class WSServer extends EventEmitter {
     // Cleanup and shutdown websocket server
     close() {
         return new Promise((resolve) => {
-            if (this.xdConnection) this.xdConnection.close();
-            this.wsServer.close();
+            try {
+                // Close XD connection if exists
+                if (this.xdConnection) {
+                    this.xdConnection.close();
+                    this.xdConnection = null;
+                    this.xdConnectionId = null;
+                }
 
-            logger.server('ws-server-closed', 'WebSocket server closed');
-            resolve();
+                // Close WebSocket server if exists
+                if (this.wsServer) {
+                    this.wsServer.close(() => {
+                        logger.server('ws-server-closed', 'WebSocket server closed successfully');
+                        resolve();
+                    });
+                } else {
+                    logger.server('ws-server-closed', 'WebSocket server already closed');
+                    resolve();
+                }
+
+                // Remove all event listeners to prevent memory leaks
+                this.removeAllListeners();
+            } catch (error) {
+                logger.error('Error closing WebSocket server:', error);
+                resolve(); // Resolve anyway to allow process to exit
+            }
         });
     }
 }
