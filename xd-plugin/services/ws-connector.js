@@ -1,14 +1,14 @@
 /**
- * XD Plugin MCP Connector - Connects Adobe XD plugin to MCP server
+ * XD Plugin Connector - Connects Adobe XD plugin to WebSocket server
  *
- * This module enables communication with the MCP server. It handles both HTTP and WebSocket
+ * This module enables communication with the WebSocket server. It handles WebSocket
  * communication for real-time updates.
  */
 
 const PING_INTERVAL = 10000;
 const PORT = 4000;
 
-class XDMCPConnector {
+class WSConnector {
     constructor(options = {}) {
         this.serverUrl = options.serverUrl || `http://localhost:${PORT}`;
         this.wsUrl = options.wsUrl || `ws://localhost:${PORT}`;
@@ -32,7 +32,7 @@ class XDMCPConnector {
     }
 
     /**
-     * Connect to MCP server via WebSocket
+     * Connect to WebSocket server
      */
     connect() {
         if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
@@ -40,11 +40,11 @@ class XDMCPConnector {
         }
 
         try {
-            console.info('Connecting to XD MCP Server...');
+            console.info('Connecting to WebSocket Server...');
             this.ws = new WebSocket(this.wsUrl);
 
             this.ws.onopen = () => {
-                console.info('Connected to XD MCP Server');
+                console.info('Connected to WebSocket Server');
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
 
@@ -69,7 +69,7 @@ class XDMCPConnector {
             };
 
             this.ws.onclose = () => {
-                console.info('Disconnected from XD MCP Server');
+                console.info('Disconnected from WebSocket Server');
                 this.isConnected = false;
                 this.connectionId = null;
 
@@ -86,7 +86,7 @@ class XDMCPConnector {
                 this.notifyConnectionStatusChange(false, this.reconnectAttempts);
             };
         } catch (error) {
-            console.error('Failed to connect to MCP server:', error);
+            console.error('Failed to connect to WebSocket server:', error);
             this.scheduleReconnect();
         }
     }
@@ -117,7 +117,7 @@ class XDMCPConnector {
     }
 
     /**
-     * Handle messages from MCP server
+     * Handle messages from WebSocket server
      */
     handleServerMessage(data) {
         switch (data.type) {
@@ -126,8 +126,12 @@ class XDMCPConnector {
                 console.info(`Received connection ID: ${this.connectionId}`);
                 break;
 
-            case 'request_selection_data':
-                this.sendCurrentSelection();
+            case 'request_selected_node_json':
+                this.sendSelectedNodeJSON();
+                break;
+
+            case 'request_selected_node_image':
+                this.sendSelectedNodeImage();
                 break;
 
             case 'pong':
@@ -149,26 +153,57 @@ class XDMCPConnector {
     }
 
     /**
-     * Send current selection data to server
+     * Send current selected node data in JSON format to server
      */
-    async sendCurrentSelection() {
+    async sendSelectedNodeJSON() {
         try {
-            if (!this.selectionData) {
-                throw new Error('No selection data to send');
-            }
+            if (!this.selectionData) throw new Error('No selected node!');
 
             // Send via WebSocket
             const message = {
-                type: 'selection_data',
+                type: 'selected_node_json',
                 payload: this.selectionData,
-                timestamp: Date.now(),
             };
 
             if (!this.sendMessage(message)) {
                 throw new Error('Failed to send websocket message');
             }
         } catch (error) {
-            console.error('Failed to send selection data:', error);
+            console.error('Failed to send selected node in JSON format:', error);
+
+            // Send error message to server
+            this.sendMessage({
+                type: 'error',
+                message: error.message,
+            });
+        }
+    }
+
+    /**
+     * Send current selected node data in image format to server
+     * TODO :: check this
+     */
+    async sendSelectedNodeImage() {
+        try {
+            if (!this.selectionData) throw new Error('No selected node!');
+
+            // Send via WebSocket
+            const message = {
+                type: 'selected_node_image',
+                payload: this.selectionData,
+            };
+
+            if (!this.sendMessage(message)) {
+                throw new Error('Failed to send websocket message');
+            }
+        } catch (error) {
+            console.error('Failed to send selected node in image format:', error);
+
+            // Send error message to server
+            this.sendMessage({
+                type: 'error',
+                message: error.message,
+            });
         }
     }
 
@@ -206,9 +241,9 @@ class XDMCPConnector {
             };
 
             if (this.sendMessage(message)) {
-                console.info('Sent ping to MCP server');
+                console.info('Sent ping to WebSocket server');
             } else {
-                console.warn('Failed to send ping to MCP server');
+                console.warn('Failed to send ping to WebSocket server');
             }
         }, PING_INTERVAL);
     }
@@ -264,4 +299,4 @@ class XDMCPConnector {
 }
 
 // Export for use in XD plugins
-module.exports = XDMCPConnector;
+module.exports = WSConnector;

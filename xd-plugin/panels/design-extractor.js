@@ -17,10 +17,10 @@ const { selection, Text } = require('scenegraph');
 const extractTextProperties = require('../extractors/text.js');
 const extractBackgroundProperties = require('../extractors/background.js');
 const { UIHelper, copyToClipboard } = require('../utils/helper.js');
-const XDMCPConnector = require('../services/mcp-connector.js');
+const WSConnector = require('../services/ws-connector.js');
 
-// Initialize MCP connector
-const mcpConnector = new XDMCPConnector();
+// Initialize WebSocket connector
+const wsConnector = new WSConnector();
 let designPanel;
 
 function create() {
@@ -248,12 +248,12 @@ function create() {
     designPanel.querySelector('#copy-btn').addEventListener('click', (event) => copyToClipboard(event, '#output'));
 
     // Set up connection status callback
-    mcpConnector.setConnectionStatusCallback((isConnected, reconnectAttempts) => {
+    wsConnector.setConnectionStatusCallback((isConnected, reconnectAttempts) => {
         updateConnectionStatus(isConnected, reconnectAttempts);
     });
 
     // Initialize with current connection status
-    updateConnectionStatus(mcpConnector.isConnected, mcpConnector.reconnectAttempts);
+    updateConnectionStatus(wsConnector.isConnected, wsConnector.reconnectAttempts);
 
     return designPanel;
 }
@@ -280,24 +280,24 @@ function updateConnectionStatus(isConnected, reconnectAttempts = 0) {
         // Connected state
         statusElement.classList.add('connected');
         dotElement.classList.add('connected');
-        textElement.textContent = 'Connected with MCP Server';
-    } else if (reconnectAttempts > 0 && reconnectAttempts < mcpConnector.maxReconnectAttempts) {
+        textElement.textContent = 'Connected with WebSocket Server';
+    } else if (reconnectAttempts > 0 && reconnectAttempts < wsConnector.maxReconnectAttempts) {
         // Reconnecting state
         statusElement.classList.add('reconnecting');
         dotElement.classList.add('reconnecting');
-        textElement.textContent = `Reconnecting (${reconnectAttempts}/${mcpConnector.maxReconnectAttempts})`;
+        textElement.textContent = `Reconnecting (${reconnectAttempts}/${wsConnector.maxReconnectAttempts})`;
     } else {
         // Disconnected state
         statusElement.classList.add('disconnected');
         dotElement.classList.add('disconnected');
 
-        if (reconnectAttempts >= mcpConnector.maxReconnectAttempts) {
+        if (reconnectAttempts >= wsConnector.maxReconnectAttempts) {
             // Retries exhausted - show retry button
             textElement.textContent = 'Connection failed - retries exhausted';
             retryButton.classList.add('show');
         } else {
             // Initial disconnected state
-            textElement.textContent = 'Disconnected from MCP Server';
+            textElement.textContent = 'Disconnected from WebSocket Server';
         }
     }
 }
@@ -478,24 +478,24 @@ function displayDesignInfo(designInfo) {
 // -------------------------------------------------------------
 
 function show(event) {
-    mcpConnector.handleSelectionChange(null);
+    wsConnector.handleSelectionChange(null);
 
     if (!designPanel) {
         event.node.appendChild(create());
         // Update connection status when panel is shown
-        updateConnectionStatus(mcpConnector.isConnected, mcpConnector.reconnectAttempts);
+        updateConnectionStatus(wsConnector.isConnected, wsConnector.reconnectAttempts);
     }
 }
 
 function hide() {
-    mcpConnector.handleSelectionChange(null);
+    wsConnector.handleSelectionChange(null);
 
     designPanel.remove();
     designPanel = null;
 }
 
 function update() {
-    mcpConnector.handleSelectionChange(null);
+    wsConnector.handleSelectionChange(null);
 
     if (!designPanel) return;
 
@@ -507,7 +507,7 @@ function update() {
 
     // Extract design information recursively
     const designInfo = extractDesignInfo(selectedItem);
-    mcpConnector.handleSelectionChange(designInfo);
+    wsConnector.handleSelectionChange(designInfo);
     displayDesignInfo(designInfo);
 
     UIHelper.toggleSpecContent(designPanel, true);

@@ -40,7 +40,7 @@ export default class MCPServer {
             {
                 description: 'Check if Adobe XD plugin is connected and ready to provide data',
             },
-            async () => await this.handleGetConnectionStatus()
+            async () => await this.getConnectionStatus()
         );
 
         mcpServer.registerTool(
@@ -49,12 +49,13 @@ export default class MCPServer {
                 description:
                     'Get details of the currently selected node/element in Adobe XD. Returns comprehensive specifications including dimensions, visual properties, typography, and more.',
             },
-            async () => await this.handleGetSelectedNode()
+            async () => await this.getSelectedNodeJSON()
+        );
         );
     }
 
-    // Get connection status
-    async handleGetConnectionStatus() {
+    // MCP tool to get connection status
+    async getConnectionStatus() {
         return {
             content: [
                 {
@@ -68,25 +69,23 @@ export default class MCPServer {
         };
     }
 
-    // Get selected node
-    async handleGetSelectedNode() {
+    // MCP tool to get selected node JSON
+    async getSelectedNodeJSON() {
         try {
             if (!this.wsServer.isConnected()) {
                 throw new Error('No Adobe XD plugin connected. Please ensure the XD plugin is installed and running.');
             }
 
-            const selectedNodeData = await this.wsServer.requestSelectionData();
-            if (!selectedNodeData) {
-                throw new Error(
-                    'No element is currently selected in Adobe XD. Please select an element and try again.'
-                );
+            const selectedNodeJSON = await this.wsServer.requestSelectedNodeJSON();
+            if (!selectedNodeJSON) {
+                throw new Error('Export failed. Please ensure node is selected in Adobe XD and try again');
             }
 
             return {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify(selectedNodeData, null, 2),
+                        text: JSON.stringify(selectedNodeJSON, null, 2),
                     },
                 ],
             };

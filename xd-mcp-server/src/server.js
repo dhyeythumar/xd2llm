@@ -70,7 +70,7 @@ class Server {
         // Selection endpoint for testing
         this.app.get('/selection', async (_, res) => {
             try {
-                const selectedNodeData = await this.wsServer.requestSelectionData();
+                const selectedNodeData = await this.wsServer.requestSelectedNodeJSON();
                 res.json({
                     status: 'ok',
                     selectedNodeData,

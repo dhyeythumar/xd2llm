@@ -79,8 +79,11 @@ export default class WSServer extends EventEmitter {
 
     handleWebSocketMessage(connectionId, data) {
         switch (data.type) {
-            case 'selection_data':
-                logger.ws('received', connectionId, `selection_data message`);
+            case 'selected_node_json':
+                logger.ws('received', connectionId, `${data.type} message`);
+                // Emit event for listeners to handle the response
+                this.emit('selected_node_json', data.payload);
+                break;
                 // Emit event for listeners to handle the response
                 this.emit('selection_data', data.payload);
                 break;
@@ -90,7 +93,6 @@ export default class WSServer extends EventEmitter {
                 this.sendMessage({
                     type: 'pong',
                     connectionId,
-                    timestamp: Date.now(),
                 });
                 break;
 
@@ -114,8 +116,56 @@ export default class WSServer extends EventEmitter {
         return false;
     }
 
-    // Send request for selection data to XD plugin and wait for response
-    async requestSelectionData(timeout = 10000) {
+    // Send request for current selected node in JSON format to XD plugin and wait for response
+    async requestSelectedNodeJSON(timeout = 5000) {
+        if (!this.isConnected()) {
+            throw new Error('No XD plugin connected');
+        }
+
+        const message = {
+            type: 'request_selected_node_json',
+        };
+
+        logger.ws('sending', this.xdConnectionId, `${message.type} message`);
+
+        return new Promise((resolve, reject) => {
+            // Set up timeout
+            const timeoutId = setTimeout(() => {
+                this.removeListener('selected_node_json', onSelectedNodeJSON);
+                this.removeListener('xd_error', onError);
+                logger.ws('timeout', this.xdConnectionId, `selected_node_json request after ${timeout}ms`);
+                reject(new Error('Selected node JSON request timeout'));
+            }, timeout);
+
+            // Set up event listeners
+            const onSelectedNodeJSON = (data) => {
+                clearTimeout(timeoutId);
+                this.removeListener('xd_error', onError);
+                logger.ws('response-received', this.xdConnectionId, 'selected_node_json received successfully');
+                resolve(data);
+            };
+
+            const onError = (error) => {
+                clearTimeout(timeoutId);
+                this.removeListener('selected_node_json', onSelectedNodeJSON);
+                logger.ws('response-error', this.xdConnectionId, error.message);
+                reject(error);
+            };
+
+            // Listen for response
+            this.once('selected_node_json', onSelectedNodeJSON);
+            this.once('xd_error', onError);
+
+            // Send the request
+            if (!this.sendMessage(message)) {
+                clearTimeout(timeoutId);
+                this.removeListener('selected_node_json', onSelectedNodeJSON);
+                this.removeListener('xd_error', onError);
+                logger.ws('send-failed', this.xdConnectionId, 'Failed to send message');
+                reject(new Error('Failed to send selected node JSON request to XD plugin'));
+            }
+        });
+    }
         if (!this.isConnected()) {
             throw new Error('No XD plugin connected');
         }
