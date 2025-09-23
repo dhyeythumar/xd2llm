@@ -6,11 +6,12 @@
  */
 
 const PING_INTERVAL = 10000;
+const PORT = 4000;
 
 class XDMCPConnector {
     constructor(options = {}) {
-        this.serverUrl = options.serverUrl || 'http://localhost:6000';
-        this.wsUrl = options.wsUrl || 'ws://localhost:6000';
+        this.serverUrl = options.serverUrl || `http://localhost:${PORT}`;
+        this.wsUrl = options.wsUrl || `ws://localhost:${PORT}`;
         this.reconnectInterval = options.reconnectInterval || 5000;
         this.maxReconnectAttempts = options.maxReconnectAttempts || 10;
 

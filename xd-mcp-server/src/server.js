@@ -16,6 +16,8 @@ import WSServer from './ws.server.js';
 import MCPServer from './mcp.server.js';
 import logger from './logger.js';
 
+const PORT = 4000;
+
 class Server {
     constructor() {
         this.wsServer = new WSServer();
@@ -112,7 +114,7 @@ class Server {
         });
     }
 
-    start(port = 6000) {
+    start(port) {
         try {
             return new Promise((resolve, reject) => {
                 try {
