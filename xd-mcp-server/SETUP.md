@@ -4,7 +4,7 @@
 > - **[README.md](README.md)**: Quick overview, features, architecture, and basic usage
 > - **SETUP.md** (this file): Detailed setup instructions, troubleshooting, and monitoring
 
-This guide provides comprehensive setup instructions for the XD MCP Server, which bridges Adobe XD with LLMs using an EventEmitter-based real-time architecture.
+This guide provides comprehensive setup instructions for the XD MCP Server, which bridges Adobe XD with LLMs using a stateless, on-demand MCP server architecture with EventEmitter-based real-time communication.
 
 ## 📋 Quick Start
 
@@ -41,11 +41,18 @@ Add to your Cursor MCP configuration:
 {
     "mcpServers": {
         "xd-mcp-server": {
-            "command": "node",
-            "args": ["/absolute/path/to/xd-mcp-server/src/mcp.server.js"],
-            "env": {
-                "XD_MCP_PORT": "6000"
-            }
+            "url": "http://localhost:6000/mcp"
+        }
+    }
+}
+```
+
+**For custom port:**
+```json
+{
+    "mcpServers": {
+        "xd-mcp-server": {
+            "url": "http://localhost:PORT/mcp"
         }
     }
 }
@@ -64,8 +71,17 @@ Expected response:
 ```json
 {
     "status": "ok",
-    "connected": false,
-    "connectionId": null
+    "xdPlugin": {
+        "connected": false,
+        "connectionId": null
+    },
+    "serverInfo": {
+        "port": 6000,
+        "name": "xd-mcp-server",
+        "version": "1.0.0",
+        "pid": 12345,
+        "startTime": "2025-09-23T09:43:53.427Z"
+    }
 }
 ```
 
@@ -73,7 +89,7 @@ Expected response:
 
 1. Open Adobe XD
 2. Load your plugin
-3. Check the server health again - `connected` should be `true` and `connectionId` should show a UUID
+3. Check the server health again - `xdPlugin.connected` should be `true` and `xdPlugin.connectionId` should show a UUID
 
 ### 3. Test MCP Tools
 
@@ -140,17 +156,49 @@ curl http://localhost:6000/selection
 2. Try the MCP tool again or test the `/selection` endpoint
 3. Check if selection change handler is properly connected in the XD plugin
 
+#### MCP Request Issues
+
+**Causes:**
+
+-   Stateless server creation failures
+-   Tool registration problems
+-   Transport initialization errors
+
+**Solutions:**
+
+1. Check server logs for MCP-specific errors
+2. Verify MCP client configuration uses HTTP URL format
+3. Test with `/health` endpoint first
+4. Ensure no CORS issues by checking browser developer tools
+
+#### Performance Issues
+
+**Causes:**
+
+-   Frequent server creation overhead
+-   Network latency to XD plugin
+-   Large selection data responses
+
+**Solutions:**
+
+1. Monitor server logs for timing information
+2. Consider request batching if needed
+3. Check XD plugin response times
+4. Verify network connectivity between components
+
 ## 📊 Monitoring
 
 ### Server Logs
 
 The server logs important events:
 
--   XD plugin connections/disconnections (`console.info`)
+-   XD plugin connections/disconnections
+-   Stateless MCP server creation and cleanup
 -   Real-time selection data requests and responses
 -   MCP tool calls and results
 -   WebSocket events and errors
 -   EventEmitter events
+-   HTTP/MCP request handling
 
 ### Health Endpoint
 
@@ -181,9 +229,15 @@ Check the browser console in Adobe XD for:
 # Start in development mode (auto-reload)
 npm run dev
 
-# Make changes to src/server.js
+# Make changes to src/server.js, src/mcp.server.js, or src/ws.server.js
 # Server automatically restarts
 ```
+
+**Key files for development:**
+- `src/server.js` - Main HTTP server and routing
+- `src/mcp.server.js` - Stateless MCP server implementation
+- `src/ws.server.js` - WebSocket server with EventEmitter
+- `src/logger.js` - Logging utilities
 
 ### 2. XD Plugin Development
 
@@ -202,14 +256,44 @@ xdpm watch -c
 3. Check logs for any issues
 4. Iterate as needed
 
+## 🏗️ Understanding the Architecture
+
+### Stateless MCP Server Design
+
+The server uses a **stateless, on-demand** approach:
+
+1. **Per-Request Instances**: Each MCP request creates a fresh server instance
+2. **Dynamic Tool Registration**: Tools are registered using `registerTool()` API
+3. **Automatic Cleanup**: Server and transport are destroyed after response
+4. **Memory Efficient**: No persistent connections or memory leaks
+
+### Request Lifecycle
+
+```
+1. HTTP Request → /mcp endpoint
+2. Create fresh McpServer instance  
+3. Register tools dynamically
+4. Process request via StreamableHTTPServerTransport
+5. Send response
+6. Cleanup server & transport
+```
+
+### Benefits
+
+- ✅ **Memory Efficient**: No persistent state
+- ✅ **Error Isolation**: Request failures don't affect others  
+- ✅ **Scalable**: Independent request processing
+- ✅ **Simple Debugging**: Clear request boundaries
+
 ## 📝 Next Steps
 
 After successful setup:
 
 1. **Explore MCP Tools**: Try all available tools in your MCP client
-2. **Customize Integration**: Modify the bridge for your specific needs
-3. **Add Custom Tools**: Extend the server with additional MCP tools
-4. **Production Deployment**: Consider deployment options for team use
+2. **Understand Architecture**: Review the stateless design above
+3. **Customize Integration**: Modify the bridge for your specific needs
+4. **Add Custom Tools**: Extend the server with additional MCP tools using `registerTool()`
+5. **Production Deployment**: Consider deployment options for team use
 
 ## 🆘 Getting Help
 

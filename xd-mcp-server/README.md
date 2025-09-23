@@ -4,12 +4,14 @@ A Model Context Protocol (MCP) server that bridges Adobe XD plugins with Large L
 
 ## 🚀 Features
 
+-   **Stateless Architecture**: On-demand MCP server creation for optimal memory management and error isolation
 -   **Real-time Communication**: EventEmitter-based WebSocket communication for instant data exchange
 -   **Single Connection Architecture**: Enforces one XD plugin connection for simplified state management
+-   **Modern MCP SDK Integration**: Leverages latest MCP SDK with `registerTool()` API for simplified tool management
 -   **Comprehensive Design Specs**: Extract detailed element specifications including dimensions, typography, colors, and visual properties
 -   **Multiple Output Formats**: Support for JSON and SCSS output formats
 -   **Request-Response Pattern**: Direct communication between LLMs and XD plugins without data caching
--   **Auto-cleanup**: Automatic event listener cleanup and error handling
+-   **Auto-cleanup**: Automatic server and transport cleanup per request
 -   **Easy Integration**: Simple integration with existing XD plugins
 
 ## 📋 Prerequisites
@@ -57,11 +59,18 @@ Add the following to your MCP client configuration (e.g., Claude Desktop config)
 {
     "mcpServers": {
         "xd-mcp-server": {
-            "command": "node",
-            "args": ["/absolute/path/to/xd-mcp-server/src/mcp.server.js"],
-            "env": {
-                "XD_MCP_PORT": "6000"
-            }
+            "url": "http://localhost:6000/mcp"
+        }
+    }
+}
+```
+
+**For custom port:**
+```json
+{
+    "mcpServers": {
+        "xd-mcp-server": {
+            "url": "http://localhost:PORT/mcp"
         }
     }
 }
@@ -69,7 +78,7 @@ Add the following to your MCP client configuration (e.g., Claude Desktop config)
 
 ### Environment Variables
 
--   `XD_MCP_PORT`: Port for HTTP/WebSocket server (default: 6000)
+-   `XD_WS_PORT`: Port for unified MCP server (default: 6000)
 
 ## 🎯 Available MCP Tools
 
@@ -99,33 +108,57 @@ Extract design specifications from the current selection
 ## 🔄 Real-time Communication Flow
 
 ```
-LLM Client ←→ MCP Server ←→ WebSocket Server ←→ Adobe XD Plugin
-    ↑              ↑              ↑                    ↑
-  Tools      Event Handlers   EventEmitter          Bridge
+LLM Client ←→ Stateless MCP Server ←→ Adobe XD Plugin
+    ↑              ↑                      ↑
+HTTP/MCP    StreamableHTTP           WebSocket
 ```
 
-1. **LLM** calls MCP tool (e.g., "get selected XD node")
-2. **MCP Server** calls WebSocket server's request method
-3. **WebSocket Server** sends request to XD plugin and sets up event listener
-4. **XD Plugin** processes request and sends response back
-5. **WebSocket Server** emits event with response data
-6. **Promise resolves** with fresh data from XD
-7. **MCP Server** formats and returns data to LLM
+1. **LLM** calls MCP tool via HTTP (e.g., "get selected XD node")
+2. **Unified Server** receives request at `/mcp` endpoint
+3. **MCP Server** creates fresh server instance with `StreamableHTTPServerTransport`
+4. **Tools** are registered dynamically using `registerTool()` API
+5. **WebSocket Server** sends request to XD plugin and sets up event listener
+6. **XD Plugin** processes request and sends response back
+7. **WebSocket Server** emits event with response data
+8. **Promise resolves** with fresh data from XD
+9. **Server & Transport** are cleaned up automatically after response
 
 ## 🏗️ Architecture
 
-The server consists of two main components:
+The server uses a **stateless, on-demand** architecture for optimal performance:
 
-### MCP Server (`mcp.server.js`)
-- Handles Model Context Protocol communication
-- Provides tools: `get_xd_connection_status`, `get_selected_xd_node`
-- Processes LLM requests and formats responses
+### Stateless MCP Server (`mcp.server.js`)
+- **On-demand Server Creation**: Fresh MCP server instance per request
+- **Dynamic Tool Registration**: Tools registered using modern `registerTool()` API
+- **Automatic Cleanup**: Server and transport destroyed after each request
+- **Memory Efficient**: No persistent connections or state management
+- **Error Isolation**: Request failures don't affect other requests
+
+### Unified HTTP Server (`server.js`)
+- Single process handling both MCP HTTP endpoints and WebSocket communication
+- Routes `/mcp` requests to stateless MCP handler
+- Provides testing endpoints (`/health`, `/selection`)
+- Manages CORS and request parsing
 
 ### WebSocket Server (`ws.server.js`)
 - Extends Node.js EventEmitter for real-time communication
 - Manages single XD plugin connection
-- Provides HTTP endpoints for testing (`/health`, `/selection`)
 - Implements request-response pattern without data storage
+- Provides real-time data fetching from Adobe XD
+
+### 🏆 Architecture Benefits
+
+**Stateless Design:**
+- ✅ **Memory Efficient**: No memory leaks from persistent connections
+- ✅ **Error Isolation**: Request failures don't affect other operations
+- ✅ **Scalable**: Each request is independent and stateless
+- ✅ **Simple Debugging**: Easy to trace individual request lifecycles
+
+**Modern MCP SDK Integration:**
+- ✅ **Simplified Tool Registration**: Uses `registerTool()` instead of manual schema handling
+- ✅ **Automatic Protocol Handling**: SDK manages MCP protocol details
+- ✅ **Transport Abstraction**: `StreamableHTTPServerTransport` handles HTTP complexities
+- ✅ **Standards Compliant**: Follows latest MCP specifications
 
 ## 🚨 Troubleshooting
 
@@ -178,8 +211,10 @@ curl http://localhost:6000/selection
 ```
 xd-mcp-server/
 ├── src/
-│   ├── mcp.server.js          # Main MCP server entry point
-│   └── ws.server.js           # WebSocket server with EventEmitter
+│   ├── server.js              # Unified HTTP server (main entry point)
+│   ├── mcp.server.js          # Stateless MCP server implementation
+│   ├── ws.server.js           # WebSocket server with EventEmitter
+│   └── logger.js              # Logging utilities
 ├── package.json
 ├── README.md
 └── SETUP.md                   # Detailed setup instructions
@@ -187,10 +222,25 @@ xd-mcp-server/
 
 ### Adding New Tools
 
-1. Add tool definition in `setupMCPTools()` method in `mcp.server.js`
-2. Implement handler in `CallToolRequestSchema` handler
-3. Add request method in `ws.server.js` if needed (following EventEmitter pattern)
-4. Add corresponding message handling in XD plugin bridge
+1. **Add tool registration** in `setupMCPTools()` method in `mcp.server.js`:
+   ```javascript
+   mcpServer.registerTool(
+       'your_tool_name',
+       { description: 'Tool description' },
+       async () => await this.handleYourTool()
+   );
+   ```
+
+2. **Implement tool handler** in the same class:
+   ```javascript
+   async handleYourTool() {
+       // Your tool logic here
+       return { content: [{ type: 'text', text: 'result' }] };
+   }
+   ```
+
+3. **Add WebSocket method** in `ws.server.js` if needed (following EventEmitter pattern)
+4. **Update XD plugin** to handle new message types if required
 
 ### Development Commands
 
