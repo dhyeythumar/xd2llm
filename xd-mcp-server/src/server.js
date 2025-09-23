@@ -45,38 +45,8 @@ class Server {
         this.app.use(express.json({ limit: '10mb' }));
 
         // Add MCP HTTP transport endpoint to the existing WebSocket server
-        this.app.post('/mcp', async (req, res) => {
+        this.app.all('/mcp', async (req, res) => {
             await this.mcpServer.handleRequest(req, res);
-        });
-
-        // SSE notifications not supported in stateless mode
-        this.app.get('/mcp', async (_, res) => {
-            logger.warn('Received GET MCP request');
-            res.writeHead(405).end(
-                JSON.stringify({
-                    jsonrpc: '2.0',
-                    error: {
-                        code: -32000,
-                        message: 'Method not allowed.',
-                    },
-                    id: null,
-                })
-            );
-        });
-
-        // Session termination not needed in stateless mode
-        this.app.delete('/mcp', async (_, res) => {
-            logger.warn('Received DELETE MCP request');
-            res.writeHead(405).end(
-                JSON.stringify({
-                    jsonrpc: '2.0',
-                    error: {
-                        code: -32000,
-                        message: 'Method not allowed.',
-                    },
-                    id: null,
-                })
-            );
         });
 
         // Health check endpoint for testing
