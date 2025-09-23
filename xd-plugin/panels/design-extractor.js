@@ -33,6 +33,9 @@ function create() {
                 max-height: 100vh;
                 overflow-y: auto;
             }
+            #spec-content {
+                margin-top: 16px;
+            }
             .design-header {
                 margin-bottom: 16px;
                 padding-bottom: 8px;
@@ -144,9 +147,62 @@ function create() {
                 font-size: 10px;
                 font-weight: bold;
             }
+            .connection-status {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+                font-weight: 500;
+                padding: 4px 8px;
+                border-radius: 12px;
+                border: 1px solid;
+                transition: all 0.3s ease;
+            }
+            .connection-status.connected {
+                background: #d4edda;
+                border-color: #c3e6cb;
+                color: #155724;
+            }
+            .connection-status.disconnected {
+                background: #f8d7da;
+                border-color: #f5c6cb;
+                color: #721c24;
+            }
+            .connection-status.reconnecting {
+                background: #fff3cd;
+                border-color: #ffeaa7;
+                color: #856404;
+            }
+            .connection-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                flex-shrink: 0;
+                margin-right: 4px;
+            }
+            .connection-dot.connected {
+                background: #28a745;
+                box-shadow: 0 0 4px rgba(40, 167, 69, 0.5);
+            }
+            .connection-dot.disconnected {
+                background: #dc3545;
+            }
+            .connection-dot.reconnecting {
+                background: #ffc107;
+                animation: pulse 1.5s infinite;
+            }
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
         </style>
         
         <div class="design-container">
+            <div id="connection-status" class="connection-status disconnected">
+                <div class="connection-dot disconnected"></div>
+                <span id="connection-text">Disconnected</span>
+            </div>
+
             <div id="spec-content" class="hide">
                 <div class="design-header">
                     <h3 class="design-title">🎨 Design Info Extractor</h3>
@@ -182,7 +238,49 @@ function create() {
     // Add event listeners
     designPanel.querySelector('#copy-btn').addEventListener('click', (event) => copyToClipboard(event, '#output'));
 
+    // Set up connection status callback
+    mcpConnector.setConnectionStatusCallback((isConnected, reconnectAttempts) => {
+        updateConnectionStatus(isConnected, reconnectAttempts);
+    });
+
+    // Initialize with current connection status
+    updateConnectionStatus(mcpConnector.isConnected, mcpConnector.reconnectAttempts);
+
     return designPanel;
+}
+
+/**
+ * Update connection status indicator
+ */
+function updateConnectionStatus(isConnected, reconnectAttempts = 0) {
+    if (!designPanel) return;
+
+    const statusElement = designPanel.querySelector('#connection-status');
+    const dotElement = designPanel.querySelector('.connection-dot');
+    const textElement = designPanel.querySelector('#connection-text');
+
+    if (!statusElement || !dotElement || !textElement) return;
+
+    // Remove all status classes
+    statusElement.classList.remove('connected', 'disconnected', 'reconnecting');
+    dotElement.classList.remove('connected', 'disconnected', 'reconnecting');
+
+    if (isConnected) {
+        // Connected state
+        statusElement.classList.add('connected');
+        dotElement.classList.add('connected');
+        textElement.textContent = 'Connected with MCP Server';
+    } else if (reconnectAttempts > 0) {
+        // Reconnecting state
+        statusElement.classList.add('reconnecting');
+        dotElement.classList.add('reconnecting');
+        textElement.textContent = `Reconnecting (${reconnectAttempts}/${mcpConnector.maxReconnectAttempts})`;
+    } else {
+        // Disconnected state
+        statusElement.classList.add('disconnected');
+        dotElement.classList.add('disconnected');
+        textElement.textContent = 'Disconnected from MCP Server';
+    }
 }
 
 /**
@@ -363,7 +461,11 @@ function displayDesignInfo(designInfo) {
 function show(event) {
     mcpConnector.handleSelectionChange(null);
 
-    if (!designPanel) event.node.appendChild(create());
+    if (!designPanel) {
+        event.node.appendChild(create());
+        // Update connection status when panel is shown
+        updateConnectionStatus(mcpConnector.isConnected, mcpConnector.reconnectAttempts);
+    }
 }
 
 function hide() {

@@ -22,6 +22,9 @@ class XDMCPConnector {
         this.connectionId = null;
         this.selectionData = null;
 
+        // Callback for connection status changes
+        this.onConnectionStatusChange = null;
+
         // Bind methods to preserve 'this' context
         this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
@@ -50,6 +53,9 @@ class XDMCPConnector {
                     clearTimeout(this.reconnectTimer);
                     this.reconnectTimer = null;
                 }
+
+                // Notify UI about connection
+                this.notifyConnectionStatusChange(true, 0);
                 this.ping();
             };
 
@@ -66,12 +72,18 @@ class XDMCPConnector {
                 console.info('Disconnected from XD MCP Server');
                 this.isConnected = false;
                 this.connectionId = null;
+                
+                // Notify UI about disconnection
+                this.notifyConnectionStatusChange(false, this.reconnectAttempts);
                 this.scheduleReconnect();
             };
 
             this.ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
                 this.isConnected = false;
+                
+                // Notify UI about error/disconnection
+                this.notifyConnectionStatusChange(false, this.reconnectAttempts);
             };
         } catch (error) {
             console.error('Failed to connect to MCP server:', error);
@@ -94,6 +106,9 @@ class XDMCPConnector {
         const delay = Math.min(this.reconnectInterval * this.reconnectAttempts, 30000);
 
         console.info(`Scheduling reconnection attempt ${this.reconnectAttempts} in ${delay}ms`);
+
+        // Notify UI about reconnection attempt
+        this.notifyConnectionStatusChange(false, this.reconnectAttempts);
 
         this.reconnectTimer = setTimeout(() => {
             this.reconnectTimer = null;
@@ -162,6 +177,22 @@ class XDMCPConnector {
      */
     handleSelectionChange(selectionData) {
         this.selectionData = selectionData;
+    }
+
+    /**
+     * Set callback for connection status changes
+     */
+    setConnectionStatusCallback(callback) {
+        this.onConnectionStatusChange = callback;
+    }
+
+    /**
+     * Notify about connection status change
+     */
+    notifyConnectionStatusChange(isConnected, reconnectAttempts = 0) {
+        if (this.onConnectionStatusChange) {
+            this.onConnectionStatusChange(isConnected, reconnectAttempts);
+        }
     }
 
     /**
