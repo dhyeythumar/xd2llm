@@ -44,20 +44,12 @@ class MCPLogger {
     }
 
     debug(message, ...args) {
-        if (process.env.DEBUG || process.env.NODE_ENV === 'development') {
-            this._writeToStderr(this._formatMessage('debug', message, ...args));
-        }
+        this._writeToStderr(this._formatMessage('debug', message, ...args));
     }
 
     log(message, ...args) {
         // Alias for info
         this.info(message, ...args);
-    }
-
-    // Connection-specific logging methods
-    connection(action, connectionId, details = '') {
-        const message = `Connection ${action}: ${connectionId} ${details}`.trim();
-        this.info(message);
     }
 
     request(method, details = '') {
@@ -72,6 +64,11 @@ class MCPLogger {
         this[level](message);
     }
 
+    // Connection-specific logging methods
+    connection(action, connectionId, details = '') {
+        const message = `Connection ${action}: ${connectionId} ${details}`.trim();
+        this.info(message);
+    }
     // WebSocket-specific logging
     ws(event, connectionId, data = '') {
         const message = `WebSocket ${event} [${connectionId}] | ${data}`.trim();

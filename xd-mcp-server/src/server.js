@@ -13,13 +13,13 @@ import cors from 'cors';
  */
 
 import WSServer from './ws.server.js';
-import { MCPHandler } from './mcp-handler.js';
+import MCPServer from './mcp.server.js';
 import logger from './logger.js';
 
-class UnifiedMCPServer {
+class Server {
     constructor() {
         this.wsServer = new WSServer();
-        this.mcpHandler = new MCPHandler(this.wsServer);
+        this.mcpServer = new MCPServer(this.wsServer);
 
         this.httpServer = null;
         this.app = express();
@@ -32,11 +32,49 @@ class UnifiedMCPServer {
     }
 
     setupHTTPServer() {
-        this.app.use(cors());
+        this.app.use(
+            cors({
+                origin: '*',
+                exposedHeaders: ['Mcp-Session-Id'],
+                allowedHeaders: ['Content-Type', 'mcp-session-id'],
+            })
+        );
         this.app.use(express.json({ limit: '10mb' }));
 
         // Add MCP HTTP transport endpoint to the existing WebSocket server
-        this.app.post('/mcp', this.mcpHandler.handleMCPRequest.bind(this.mcpHandler));
+        this.app.post('/mcp', async (req, res) => {
+            await this.mcpServer.handleRequest(req, res);
+        });
+
+        // SSE notifications not supported in stateless mode
+        this.app.get('/mcp', async (_, res) => {
+            logger.warn('Received GET MCP request');
+            res.writeHead(405).end(
+                JSON.stringify({
+                    jsonrpc: '2.0',
+                    error: {
+                        code: -32000,
+                        message: 'Method not allowed.',
+                    },
+                    id: null,
+                })
+            );
+        });
+
+        // Session termination not needed in stateless mode
+        this.app.delete('/mcp', async (_, res) => {
+            logger.warn('Received DELETE MCP request');
+            res.writeHead(405).end(
+                JSON.stringify({
+                    jsonrpc: '2.0',
+                    error: {
+                        code: -32000,
+                        message: 'Method not allowed.',
+                    },
+                    id: null,
+                })
+            );
+        });
 
         // Health check endpoint for testing
         this.app.get('/health', (_, res) => {
@@ -78,10 +116,10 @@ class UnifiedMCPServer {
             return new Promise((resolve, reject) => {
                 try {
                     // Start HTTP server
-                    this.httpServer = this.app.listen(port, () => {
+                    this.httpServer = this.app.listen(port, async () => {
                         this.currentPort = port;
                         this.startTime = new Date().toISOString();
-                        logger.server('http-ready', `HTTP server listening on port ${port}`);
+                        logger.server('http-server-started', `HTTP server listening on port ${port}`);
 
                         // Setup WebSocket server
                         this.wsServer.setupWSServer(this.httpServer);
@@ -105,9 +143,10 @@ class UnifiedMCPServer {
     close() {
         return new Promise(async (resolve) => {
             await this.wsServer.close();
+
             if (this.httpServer) {
                 this.httpServer.close(() => {
-                    logger.server('closed', 'HTTP server shutdown complete');
+                    logger.server('http-server-started', 'HTTP server shutdown complete');
                     resolve();
                 });
             } else {
@@ -119,7 +158,8 @@ class UnifiedMCPServer {
 
 // Start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-    const server = new UnifiedMCPServer();
+    logger.info('Setting up server');
+    const server = new Server();
     const port = parseInt(process.env.XD_WS_PORT) || 6000;
 
     // Setup graceful shutdown
@@ -148,4 +188,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     server.start(port);
 }
 
-export default UnifiedMCPServer;
+export default Server;

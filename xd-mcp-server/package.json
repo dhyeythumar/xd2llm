@@ -1,14 +1,18 @@
 {
     "name": "@dhyeythumar/xd-mcp-server",
     "version": "1.0.0",
-    "description": "MCP server that bridges Adobe XD plugins with LLMs for design spec extraction",
-    "main": "src/mcp.server.js",
-    "type": "module",
-    "scripts": {
-        "start": "node src/mcp.server.js",
-        "dev": "node --watch src/mcp.server.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+    "displayName": "Customized XD MCP Server",
+    "description": "MCP server that bridges Adobe XD plugin with LLMs for design spec extraction, so LLMs can generate UI code more accurately based on the design specs.",
+    "author": {
+        "name": "Dhyey Thumar",
+        "email": "dhyeythumar@gmail.com",
+        "url": "https://github.com/dhyeythumar"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dhyeythumar/xd-ecosystem.git"
+    },
+    "homepage": "https://github.com/dhyeythumar/xd-ecosystem",
     "keywords": [
         "mcp",
         "adobe-xd",
@@ -16,18 +20,25 @@
         "llm",
         "bridge"
     ],
-    "author": "Dhyey Thumar",
     "license": "MIT",
+    "type": "module",
+    "main": "src/server.js",
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "node --watch src/server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^0.6.0",
-        "ws": "^8.18.0",
-        "express": "^4.21.1",
+        "@modelcontextprotocol/sdk": "^1.18.1",
         "cors": "^2.8.5",
-        "uuid": "^10.0.0"
+        "express": "^4.21.1",
+        "uuid": "^10.0.0",
+        "ws": "^8.18.0"
     },
     "devDependencies": {
         "@types/node": "^22.0.0"
     },
+    "packageManager": "npm@11.4.2",
     "engines": {
         "node": ">=22.0.0"
     }

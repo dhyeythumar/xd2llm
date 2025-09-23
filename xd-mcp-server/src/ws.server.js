@@ -25,6 +25,8 @@ export default class WSServer extends EventEmitter {
         // Setup WebSocket server for real-time communication
         this.wsServer = new WebSocketServer({ server: httpServer });
 
+        logger.server('ws-server-started', 'WebSocket server ready for XD plugin connections');
+
         this.wsServer.on('connection', (ws, req) => {
             // Check if we already have a connection
             if (this.xdConnection) {
@@ -59,7 +61,7 @@ export default class WSServer extends EventEmitter {
             });
 
             ws.on('error', (error) => {
-                logger.ws('error', connectionId, error.message);
+                logger.connection('error', connectionId, error.message);
                 this.xdConnection = null;
                 this.xdConnectionId = null;
             });
@@ -176,10 +178,10 @@ export default class WSServer extends EventEmitter {
     // Cleanup and shutdown websocket server
     close() {
         return new Promise((resolve) => {
-            if (this.xdConnection) {
-                this.xdConnection.close();
-            }
-            logger.ws('closed', this.xdConnectionId, 'WebSocket connection closed');
+            if (this.xdConnection) this.xdConnection.close();
+            this.wsServer.close();
+
+            logger.server('ws-server-closed', 'WebSocket server closed');
             resolve();
         });
     }
