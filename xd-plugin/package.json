@@ -1,20 +1,18 @@
 {
-    "name": "xd-plugin",
+    "name": "@dhyeythumar/xd-plugin",
     "version": "1.0.0",
-    "description": "Extract design specs from XD in SCSS or JSON.",
-    "homepage": "https://github.com/dhyeythumar/xd-plugin#readme",
-    "bugs": {
-        "url": "https://github.com/dhyeythumar/xd-plugin/issues"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/dhyeythumar/xd-plugin.git"
-    },
+    "displayName": "Customized XD Plugin",
+    "description": "Adobe XD plugin that extracts design specifications and communicates with AI assistants and Large Language Models (LLMs) for intelligent design-to-code workflows.",
     "license": "MIT",
-    "author": "Dhyey Thumar",
+    "author": {
+        "name": "Dhyey Thumar",
+        "email": "dhyeythumar@gmail.com",
+        "url": "https://github.com/dhyeythumar"
+    },
     "type": "commonjs",
     "main": "main.js",
     "scripts": {
+        "setup": "npm ci && npm run plugin:install",
         "plugin:install": "xdpm install -o -c",
         "plugin:watch": "xdpm watch -c",
         "plugin:validate": "xdpm validate .",

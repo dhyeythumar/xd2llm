@@ -1,0 +1,32 @@
+{
+    "name": "@dhyeythumar/xd-ecosystem",
+    "version": "1.0.0",
+    "displayName": "XD Ecosystem",
+    "description": "Ecosystem that bridges Adobe XD plugin with LLMs for design spec extraction, so LLMs can generate UI code more accurately based on the design specs.",
+    "license": "MIT",
+    "author": {
+        "name": "Dhyey Thumar",
+        "email": "dhyeythumar@gmail.com",
+        "url": "https://github.com/dhyeythumar"
+    },
+    "keywords": [
+        "mcp-server",
+        "llm",
+        "design-specs-extractor",
+        "bridge",
+        "websocket",
+        "adobe-xd-plugin"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dhyeythumar/xd-ecosystem.git"
+    },
+    "homepage": "https://github.com/dhyeythumar/xd-ecosystem",
+    "scripts": {
+        "setup": "cd xd-server && npm run setup && cd .. && cd xd-plugin && npm run setup"
+    },
+    "packageManager": "npm@11.4.2",
+    "engines": {
+        "node": ">=22.0.0"
+    }
+}

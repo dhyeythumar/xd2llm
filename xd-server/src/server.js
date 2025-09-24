@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import express from 'express';
 import cors from 'cors';
 
@@ -49,7 +51,7 @@ class Server {
                     connectionId: this.#wsServer.getConnectionId(),
                 },
                 serverInfo: {
-                    name: 'xd-mcp-server',
+                    name: 'xd-server',
                     version: '1.0.0',
                     pid: process.pid,
                     startTime: this.#startTime,
@@ -150,51 +152,49 @@ class Server {
 }
 
 // Start the server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-    logger.info('Setting up server');
-    const server = new Server();
+logger.info('Setting up server');
+const server = new Server();
 
-    let isShuttingDown = false;
+let isShuttingDown = false;
 
-    // Graceful shutdown function
-    const gracefulShutdown = async (signal) => {
-        if (isShuttingDown) {
-            logger.warn('Already shutting down, forcing exit...');
-            process.exit(1);
-        }
-
-        isShuttingDown = true;
-        logger.server('shutdown-start', `Starting server shutdown... (${signal})`);
-
-        try {
-            await server.close();
-            logger.server('shutdown-complete', 'Graceful shutdown completed');
-            process.exit(0);
-        } catch (error) {
-            logger.error('Error during graceful shutdown:', error);
-            process.exit(1);
-        }
-    };
-
-    // Setup graceful shutdown - only register once
-    process.once('SIGINT', () => gracefulShutdown('SIGINT'));
-    process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
-
-    process.once('uncaughtException', (error) => {
-        logger.error('Uncaught exception:', error);
-        gracefulShutdown('uncaughtException').catch(() => process.exit(1));
-    });
-
-    process.once('unhandledRejection', (reason) => {
-        logger.error('Unhandled rejection:', reason);
-        gracefulShutdown('unhandledRejection').catch(() => process.exit(1));
-    });
-
-    // Start server
-    server.start(PORT).catch((error) => {
-        logger.error('Failed to start server:', error);
+// Graceful shutdown function
+const gracefulShutdown = async (signal) => {
+    if (isShuttingDown) {
+        logger.warn('Already shutting down, forcing exit...');
         process.exit(1);
-    });
-}
+    }
+
+    isShuttingDown = true;
+    logger.server('shutdown-start', `Starting server shutdown... (${signal})`);
+
+    try {
+        await server.close();
+        logger.server('shutdown-complete', 'Graceful shutdown completed');
+        process.exit(0);
+    } catch (error) {
+        logger.error('Error during graceful shutdown:', error);
+        process.exit(1);
+    }
+};
+
+// Setup graceful shutdown - only register once
+process.once('SIGINT', () => gracefulShutdown('SIGINT'));
+process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+process.once('uncaughtException', (error) => {
+    logger.error('Uncaught exception:', error);
+    gracefulShutdown('uncaughtException').catch(() => process.exit(1));
+});
+
+process.once('unhandledRejection', (reason) => {
+    logger.error('Unhandled rejection:', reason);
+    gracefulShutdown('unhandledRejection').catch(() => process.exit(1));
+});
+
+// Start server
+server.start(PORT).catch((error) => {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+});
 
 export default Server;

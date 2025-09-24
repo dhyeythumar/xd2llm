@@ -66,7 +66,7 @@ Add the following to your MCP client configuration (e.g., Cursor Desktop config)
         },
         "serverInfo": {
             "port": 6000,
-            "name": "xd-mcp-server",
+            "name": "xd-server",
             "version": "1.0.0",
             "pid": 12345,
             "startTime": "2025-09-23T09:43:53.427Z"
