@@ -59,22 +59,6 @@ class Server {
                 },
             });
         });
-
-        // Selection endpoint for testing (TODO :: deprecated)
-        this.#app.get('/selection', async (_, res) => {
-            try {
-                const selectedNodeData = await this.#wsServer.requestSelectedNodeJSON();
-                res.json({
-                    status: 'ok',
-                    selectedNodeData,
-                });
-            } catch (error) {
-                res.status(500).json({
-                    status: 'error',
-                    message: error.message,
-                });
-            }
-        });
     }
 
     constructor() {

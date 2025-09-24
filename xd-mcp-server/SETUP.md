@@ -110,6 +110,154 @@ curl http://localhost:6000/selection
 # This will either return selection data or an error if nothing is selected
 ```
 
+## 🔍 Testing with MCP Inspector
+
+The MCP Inspector is the recommended way to test and debug your MCP server. It provides an interactive web interface for testing tools, inspecting server capabilities, and monitoring real-time interactions.
+
+### Installation
+
+```bash
+# Install MCP Inspector as a dev dependency
+npm install --save-dev @modelcontextprotocol/inspector
+
+# Or run directly with npx (no installation needed)
+npx @modelcontextprotocol/inspector
+```
+
+### Setup and Connection
+
+1. **Start your XD MCP Server:**
+   ```bash
+   npm start
+   ```
+
+2. **Launch MCP Inspector:**
+   ```bash
+   npx @modelcontextprotocol/inspector
+   ```
+
+3. **Connect to Your Server:**
+   - The Inspector will open in your browser
+   - In the "Server Connection" pane:
+     - Select "HTTP" as the transport method
+     - Enter server URL: `http://localhost:4000/mcp`
+     - Click "Connect"
+
+### Testing Workflow
+
+#### Step 1: Basic Connectivity
+- Verify connection status shows "Connected"
+- Check that both MCP tools appear in the Tools tab:
+  - `get_xd_connection_status`
+  - `get_selected_xd_node`
+
+#### Step 2: Test Connection Status Tool
+1. Go to the **Tools** tab
+2. Find `get_xd_connection_status` tool
+3. Click "Test" to execute the tool
+4. Review the response:
+   - Should show `connected: false` initially
+   - Should show `connected: true` after XD plugin connects
+
+#### Step 3: Test XD Plugin Integration
+1. Open Adobe XD and load your plugin
+2. Test `get_xd_connection_status` again
+3. Verify `connected: true` and valid `connectionId`
+
+#### Step 4: Test Selection Tool
+1. Select an element in Adobe XD
+2. Go to the **Tools** tab
+3. Find `get_selected_xd_node` tool
+4. Click "Test" to execute
+5. Review the detailed element specifications returned
+
+#### Step 5: Real-time Testing
+1. Change selections in Adobe XD
+2. Re-test the `get_selected_xd_node` tool
+3. Verify updated element data is returned
+4. Monitor the **Notifications** pane for real-time updates
+
+### Inspector Features for Debugging
+
+**Tools Tab:**
+- Lists all available MCP tools with schemas
+- Enables interactive tool testing
+- Shows execution results and timing
+- Displays error messages and stack traces
+
+**Resources Tab:**
+- Lists available server resources
+- Shows resource metadata and descriptions
+- Allows content inspection
+
+**Notifications Pane:**
+- Shows all server logs and events
+- Displays WebSocket connection status
+- Shows real-time notifications from XD plugin
+- Helps debug communication issues
+
+### Advanced Testing Scenarios
+
+#### Error Handling Testing
+1. **Disconnect XD Plugin:**
+   - Close Adobe XD or disable the plugin
+   - Test `get_xd_connection_status` - should show `connected: false`
+   - Test `get_selected_xd_node` - should return appropriate error
+
+2. **No Selection Testing:**
+   - Deselect all elements in XD
+   - Test `get_selected_xd_node` - should return "No element selected" error
+
+3. **Invalid Inputs:**
+   - Test tools with malformed requests
+   - Verify proper error responses
+
+#### Performance Testing
+1. **Concurrent Requests:**
+   - Test multiple tool calls simultaneously
+   - Monitor response times in the Inspector
+   - Check for any race conditions
+
+2. **Large Selections:**
+   - Select complex elements with many properties
+   - Test response times and data size
+   - Verify all properties are correctly extracted
+
+### Troubleshooting with Inspector
+
+**Connection Issues:**
+- Check the Notifications pane for connection errors
+- Verify server URL is correct (`http://localhost:6000/mcp`)
+- Ensure server is running and accessible
+
+**Tool Execution Failures:**
+- Review tool execution logs in Notifications pane
+- Check for WebSocket connection status
+- Verify XD plugin is connected and responsive
+
+**Performance Issues:**
+- Monitor tool execution times
+- Check for memory leaks in long-running sessions
+- Verify server cleanup after each request
+
+### Development Workflow with Inspector
+
+1. **Make Changes:**
+   - Modify your MCP server code
+   - Update tool implementations
+   - Add new tools or modify existing ones
+
+2. **Test Changes:**
+   - Restart the server: `npm start`
+   - Reconnect the Inspector
+   - Test affected tools and features
+   - Monitor logs for any issues
+
+3. **Iterate:**
+   - Fix any issues found during testing
+   - Re-test until everything works correctly
+   - Document any new tools or changes
+
 ## 🚨 Troubleshooting
 
 ### Common Issues

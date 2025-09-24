@@ -43,10 +43,7 @@ A Model Context Protocol (MCP) server that bridges Adobe XD plugins with Large L
 
     ```bash
     # Check server health
-    curl http://localhost:6000/health
-    
-    # Test selection endpoint (requires XD plugin connected)
-    curl http://localhost:6000/selection
+    curl http://localhost:4000/health
     ```
 
 ## 🔧 Configuration
@@ -59,7 +56,7 @@ Add the following to your MCP client configuration (e.g., Claude Desktop config)
 {
     "mcpServers": {
         "xd-mcp-server": {
-            "url": "http://localhost:6000/mcp"
+            "url": "http://localhost:4000/mcp"
         }
     }
 }
@@ -187,22 +184,102 @@ The server uses a **stateless, on-demand** architecture for optimal performance:
 
 ## 🧪 Testing
 
+### Manual Testing
+
 Test the server manually:
 
 ```bash
 # Check server health and connection status
 curl http://localhost:6000/health
 
-# Test real-time selection data (requires connected XD plugin)
-curl http://localhost:6000/selection
-
 # Expected health response
 {
   "status": "ok",
-  "connected": true,
-  "connectionId": "uuid-string"
+  "xdPlugin": {
+    "connected": true,
+    "connectionId": "uuid-string",
+  },
 }
 ```
+
+### Testing with MCP Inspector
+
+The MCP Inspector is an interactive developer tool for testing and debugging MCP servers. It provides a web interface to inspect server capabilities, test tools, and monitor server interactions in real-time.
+
+
+#### Testing Your MCP Server
+
+1. **Start the XD MCP Server:**
+   ```bash
+   npm start
+   ```
+
+2. **Launch MCP Inspector:**
+   ```bash
+   npm run inspector
+   ```
+
+3. **Connect to Your Server:**
+   - In the Inspector's Server Connection pane, select "HTTP" as the transport method
+   - Enter the server URL: `http://localhost:4000/mcp`
+   - Click "Connect"
+
+#### Inspector Features
+
+**Tools Tab:**
+- Lists all available MCP tools (`get_xd_connection_status`, `get_selected_xd_node`)
+- Shows tool schemas and descriptions
+- Enables tool testing with custom inputs
+- Displays tool execution results in real-time
+
+**Resources Tab:**
+- Lists all available resources
+- Displays resource metadata (MIME types, descriptions)
+- Allows resource content inspection
+
+**Notifications Pane:**
+- Shows all logs from the server
+- Displays notifications received from the server
+- Helps debug connection and communication issues
+
+#### Testing Workflow
+
+1. **Basic Connectivity Test:**
+   - Connect to the server
+   - Verify the connection status
+   - Check that tools are listed in the Tools tab
+
+2. **Tool Testing:**
+   - Test `get_xd_connection_status` tool
+   - Test `get_selected_xd_node` tool (requires XD plugin connected)
+   - Verify tool responses and error handling
+
+3. **Real-time Testing:**
+   - Select elements in Adobe XD
+   - Test tools with different selections
+   - Monitor notifications for real-time updates
+
+#### Development Best Practices
+
+**Iterative Testing:**
+1. Make changes to your MCP server
+2. Restart the server: `npm start`
+3. Reconnect the Inspector
+4. Test affected features
+5. Monitor logs and notifications
+
+**Edge Case Testing:**
+- Test with invalid inputs
+- Check behavior when XD plugin is disconnected
+- Test concurrent tool calls
+- Verify error handling and responses
+
+#### Troubleshooting with Inspector
+
+- **Connection Issues**: Check the Notifications pane for connection errors
+- **Tool Failures**: Review tool execution logs in the Notifications pane
+- **XD Plugin Issues**: Verify XD plugin connection status using the health endpoint
+- **Performance**: Monitor tool execution times and server response times
 
 ## 📝 Development
 
