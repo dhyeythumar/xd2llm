@@ -82,7 +82,7 @@ async function exportNodeAsBase64(node) {
                 node: node,
                 outputFile: file,
                 type: application.RenditionType.PNG,
-                scale: 4,
+                scale: 1,
             },
         ];
 
