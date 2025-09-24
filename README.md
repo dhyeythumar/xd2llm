@@ -12,10 +12,11 @@ Adobe XD plugin that extracts design specifications and communicates with extern
 - WebSocket communication
 - JSON and SCSS export formats
 - Design token generation
+- Optimized image export (Base64 PNG with configurable scale)
 
 **[📖 Read Plugin Documentation →](./xd-plugin/README.md)**
 
-### 🌐 [XD MCP Server](./xd-mcp-server/)
+### 🌐 [XD MCP Server](./xd-server/)
 Model Context Protocol (MCP) server that bridges XD plugins with LLMs using EventEmitter-based real-time communication.
 
 **Features:**
@@ -24,7 +25,7 @@ Model Context Protocol (MCP) server that bridges XD plugins with LLMs using Even
 - Single connection architecture
 - Structured logging for stdio
 
-**[📖 Read Server Documentation →](./xd-mcp-server/README.md)**
+**[📖 Read Server Documentation →](./xd-server/README.md)**
 
 ## 🔄 How It Works
 
@@ -52,7 +53,7 @@ AI Tools    Real-time Bridge  EventEmitter   Design Data
 
 2. **Start MCP Server**:
    ```bash
-   cd xd-mcp-server
+   cd xd-server
    npm install
    npm start
    ```
@@ -70,14 +71,14 @@ AI Tools    Real-time Bridge  EventEmitter   Design Data
 Each component has its own development setup:
 
 - **XD Plugin**: See [xd-plugin development guide](./xd-plugin/README.md#development)
-- **MCP Server**: See [xd-mcp-server development guide](./xd-mcp-server/README.md#development)
+- **MCP Server**: See [xd-server development guide](./xd-server/README.md#development)
 
 ## 📄 Documentation
 
 | Component | Quick Start | Detailed Setup | Troubleshooting |
 |-----------|-------------|----------------|-----------------|
 | **XD Plugin** | [README](./xd-plugin/README.md) | - | - |
-| **MCP Server** | [README](./xd-mcp-server/README.md) | [SETUP](./xd-mcp-server/SETUP.md) | [SETUP](./xd-mcp-server/SETUP.md#troubleshooting) |
+| **MCP Server** | [README](./xd-server/README.md) | [SETUP](./xd-server/SETUP.md) | [SETUP](./xd-server/SETUP.md#troubleshooting) |
 
 ## 💡 Use Cases
 
@@ -103,5 +104,5 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 
 **🔗 Component Links:**
 - [XD Plugin Documentation](./xd-plugin/README.md)
-- [MCP Server Documentation](./xd-mcp-server/README.md)
-- [MCP Server Setup Guide](./xd-mcp-server/SETUP.md)
+- [MCP Server Documentation](./xd-server/README.md)
+- [MCP Server Setup Guide](./xd-server/SETUP.md)

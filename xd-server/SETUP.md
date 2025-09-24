@@ -1,58 +1,49 @@
-# XD MCP Server Setup Guide
+# XD Server Setup Guide
 
 > **📖 Documentation Structure**:
-> - **[README.md](README.md)**: Quick overview, features, architecture, and basic usage
-> - **SETUP.md** (this file): Detailed setup instructions, troubleshooting, and monitoring
+>
+> -   **[README.md](README.md)**: Quick overview, features, architecture, and basic usage
+> -   **SETUP.md** (this file): Detailed setup instructions, troubleshooting, and monitoring
 
-This guide provides comprehensive setup instructions for the XD MCP Server, which bridges Adobe XD with LLMs using a stateless, on-demand MCP server architecture with EventEmitter-based real-time communication.
+This guide provides comprehensive setup instructions for the XD Server, which bridges Adobe XD with LLMs using a stateless, on-demand MCP server architecture with EventEmitter-based real-time communication.
 
-## 📋 Quick Start
+## 🛠 Quick Start
 
-### 1. Install Dependencies
+1. **Install dependencies**
 
-```bash
-cd xd-mcp-server
-npm install
-```
+    ```bash
+    cd xd-server
+    npm install
+    ```
 
-### 2. Start the Server
+2. **Start the server**
 
-```bash
-# Option 1: Using npm script
-npm start
+    ```bash
+    # Production mode
+    npm start
 
-# Option 2: Development mode with auto-reload
-npm run dev
-```
+    # Development mode with auto-reload
+    npm run dev
+    ```
 
-### 3. Configure Your MCP Client
+3. **Test the server**
 
-#### For Claude Desktop:
+    ```bash
+    # Check server health
+    curl http://localhost:4000/health
+    ```
 
-1. Open Claude Desktop settings
-2. Add the server configuration from `config/claude-desktop.json`
-3. Restart Claude Desktop
+## 🔧 Configuration
 
-#### For Cursor:
+### MCP Client Configuration
 
-Add to your Cursor MCP configuration:
+Add the following to your MCP client configuration (e.g., Cursor Desktop config):
 
 ```json
 {
     "mcpServers": {
         "xd-mcp-server": {
-            "url": "http://localhost:6000/mcp"
-        }
-    }
-}
-```
-
-**For custom port:**
-```json
-{
-    "mcpServers": {
-        "xd-mcp-server": {
-            "url": "http://localhost:PORT/mcp"
+            "url": "http://localhost:4000/mcp"
         }
     }
 }
@@ -62,28 +53,26 @@ Add to your Cursor MCP configuration:
 
 ### 1. Test Server Health
 
-```bash
-curl http://localhost:6000/health
-```
+    ```bash
+    # Check server health and connection status
+    curl http://localhost:4000/health
 
-Expected response:
-
-```json
-{
-    "status": "ok",
-    "xdPlugin": {
-        "connected": false,
-        "connectionId": null
-    },
-    "serverInfo": {
-        "port": 6000,
-        "name": "xd-mcp-server",
-        "version": "1.0.0",
-        "pid": 12345,
-        "startTime": "2025-09-23T09:43:53.427Z"
+    # Expected response:
+    {
+        "status": "ok",
+        "xdPlugin": {
+            "connected": false,
+            "connectionId": null
+        },
+        "serverInfo": {
+            "port": 6000,
+            "name": "xd-mcp-server",
+            "version": "1.0.0",
+            "pid": 12345,
+            "startTime": "2025-09-23T09:43:53.427Z"
+        }
     }
-}
-```
+    ```
 
 ### 2. Test XD Plugin Connection
 
@@ -91,7 +80,7 @@ Expected response:
 2. Load your plugin
 3. Check the server health again - `xdPlugin.connected` should be `true` and `xdPlugin.connectionId` should show a UUID
 
-### 3. Test MCP Tools
+### 3. Test MCP Tools with MCP Client
 
 In your MCP client (Claude Desktop, Cursor, etc.), try:
 
@@ -101,162 +90,45 @@ Get the selected XD node details
 What are the properties of the selected element?
 ```
 
-### 4. Test Direct Endpoints
+### 4. Testing with MCP Inspector
 
-```bash
-# Test real-time selection endpoint
-curl http://localhost:6000/selection
+The MCP Inspector is an interactive developer tool for testing and debugging MCP servers. It provides a web interface to inspect server capabilities, test tools, and monitor server interactions in real-time.
 
-# This will either return selection data or an error if nothing is selected
-```
+1. **Start the XD MCP Server:**
 
-## 🔍 Testing with MCP Inspector
-
-The MCP Inspector is the recommended way to test and debug your MCP server. It provides an interactive web interface for testing tools, inspecting server capabilities, and monitoring real-time interactions.
-
-### Installation
-
-```bash
-# Install MCP Inspector as a dev dependency
-npm install --save-dev @modelcontextprotocol/inspector
-
-# Or run directly with npx (no installation needed)
-npx @modelcontextprotocol/inspector
-```
-
-### Setup and Connection
-
-1. **Start your XD MCP Server:**
-   ```bash
-   npm start
-   ```
+    ```bash
+    npm start
+    ```
 
 2. **Launch MCP Inspector:**
-   ```bash
-   npx @modelcontextprotocol/inspector
-   ```
+
+    ```bash
+    npm run inspector
+    ```
 
 3. **Connect to Your Server:**
-   - The Inspector will open in your browser
-   - In the "Server Connection" pane:
-     - Select "HTTP" as the transport method
-     - Enter server URL: `http://localhost:4000/mcp`
-     - Click "Connect"
+    - In the Inspector's Server Connection pane, select "HTTP" as the transport method
+    - Enter the server URL: `http://localhost:4000/mcp`
+    - Click "Connect"
 
-### Testing Workflow
+### 5. Testing Workflow with inspector
 
-#### Step 1: Basic Connectivity
-- Verify connection status shows "Connected"
-- Check that both MCP tools appear in the Tools tab:
-  - `get_xd_connection_status`
-  - `get_selected_xd_node`
+1. **Basic Connectivity Test:**
 
-#### Step 2: Test Connection Status Tool
-1. Go to the **Tools** tab
-2. Find `get_xd_connection_status` tool
-3. Click "Test" to execute the tool
-4. Review the response:
-   - Should show `connected: false` initially
-   - Should show `connected: true` after XD plugin connects
+    - Connect to the server
+    - Verify the connection status
+    - Check that tools are listed in the Tools tab
 
-#### Step 3: Test XD Plugin Integration
-1. Open Adobe XD and load your plugin
-2. Test `get_xd_connection_status` again
-3. Verify `connected: true` and valid `connectionId`
+2. **Tool Testing:**
 
-#### Step 4: Test Selection Tool
-1. Select an element in Adobe XD
-2. Go to the **Tools** tab
-3. Find `get_selected_xd_node` tool
-4. Click "Test" to execute
-5. Review the detailed element specifications returned
+    - Test `get_xd_connection_status` tool
+    - Test `get_selected_xd_node` tool (requires XD plugin connected)
+    - Verify tool responses and error handling
 
-#### Step 5: Real-time Testing
-1. Change selections in Adobe XD
-2. Re-test the `get_selected_xd_node` tool
-3. Verify updated element data is returned
-4. Monitor the **Notifications** pane for real-time updates
-
-### Inspector Features for Debugging
-
-**Tools Tab:**
-- Lists all available MCP tools with schemas
-- Enables interactive tool testing
-- Shows execution results and timing
-- Displays error messages and stack traces
-
-**Resources Tab:**
-- Lists available server resources
-- Shows resource metadata and descriptions
-- Allows content inspection
-
-**Notifications Pane:**
-- Shows all server logs and events
-- Displays WebSocket connection status
-- Shows real-time notifications from XD plugin
-- Helps debug communication issues
-
-### Advanced Testing Scenarios
-
-#### Error Handling Testing
-1. **Disconnect XD Plugin:**
-   - Close Adobe XD or disable the plugin
-   - Test `get_xd_connection_status` - should show `connected: false`
-   - Test `get_selected_xd_node` - should return appropriate error
-
-2. **No Selection Testing:**
-   - Deselect all elements in XD
-   - Test `get_selected_xd_node` - should return "No element selected" error
-
-3. **Invalid Inputs:**
-   - Test tools with malformed requests
-   - Verify proper error responses
-
-#### Performance Testing
-1. **Concurrent Requests:**
-   - Test multiple tool calls simultaneously
-   - Monitor response times in the Inspector
-   - Check for any race conditions
-
-2. **Large Selections:**
-   - Select complex elements with many properties
-   - Test response times and data size
-   - Verify all properties are correctly extracted
-
-### Troubleshooting with Inspector
-
-**Connection Issues:**
-- Check the Notifications pane for connection errors
-- Verify server URL is correct (`http://localhost:6000/mcp`)
-- Ensure server is running and accessible
-
-**Tool Execution Failures:**
-- Review tool execution logs in Notifications pane
-- Check for WebSocket connection status
-- Verify XD plugin is connected and responsive
-
-**Performance Issues:**
-- Monitor tool execution times
-- Check for memory leaks in long-running sessions
-- Verify server cleanup after each request
-
-### Development Workflow with Inspector
-
-1. **Make Changes:**
-   - Modify your MCP server code
-   - Update tool implementations
-   - Add new tools or modify existing ones
-
-2. **Test Changes:**
-   - Restart the server: `npm start`
-   - Reconnect the Inspector
-   - Test affected tools and features
-   - Monitor logs for any issues
-
-3. **Iterate:**
-   - Fix any issues found during testing
-   - Re-test until everything works correctly
-   - Document any new tools or changes
+3. **Real-time Testing:**
+    - Select elements in Adobe XD
+    - Test tools with different selections
+    - Monitor notifications for real-time updates
 
 ## 🚨 Troubleshooting
 
@@ -348,18 +220,6 @@ The server logs important events:
 -   EventEmitter events
 -   HTTP/MCP request handling
 
-### Health Endpoint
-
-Monitor server status:
-
-```bash
-# Basic health check
-curl http://localhost:6000/health
-
-# Detailed status with jq (if installed)
-curl -s http://localhost:6000/health | jq
-```
-
 ### XD Plugin Logs
 
 Check the browser console in Adobe XD for:
@@ -368,108 +228,3 @@ Check the browser console in Adobe XD for:
 -   WebSocket events
 -   Error messages
 -   Selection change events
-
-## 🔄 Development Workflow
-
-### 1. Server Development
-
-```bash
-# Start in development mode (auto-reload)
-npm run dev
-
-# Make changes to src/server.js, src/mcp.server.js, or src/ws.server.js
-# Server automatically restarts
-```
-
-**Key files for development:**
-- `src/server.js` - Main HTTP server and routing
-- `src/mcp.server.js` - Stateless MCP server implementation
-- `src/ws.server.js` - WebSocket server with EventEmitter
-- `src/logger.js` - Logging utilities
-
-### 2. XD Plugin Development
-
-```bash
-# In your XD plugin directory
-xdpm watch -c
-
-# Make changes to plugin files
-# Plugin automatically reloads in XD
-```
-
-### 3. Testing Changes
-
-1. Make changes to server or plugin
-2. Test with MCP client
-3. Check logs for any issues
-4. Iterate as needed
-
-## 🏗️ Understanding the Architecture
-
-### Stateless MCP Server Design
-
-The server uses a **stateless, on-demand** approach:
-
-1. **Per-Request Instances**: Each MCP request creates a fresh server instance
-2. **Dynamic Tool Registration**: Tools are registered using `registerTool()` API
-3. **Automatic Cleanup**: Server and transport are destroyed after response
-4. **Memory Efficient**: No persistent connections or memory leaks
-
-### Request Lifecycle
-
-```
-1. HTTP Request → /mcp endpoint
-2. Create fresh McpServer instance  
-3. Register tools dynamically
-4. Process request via StreamableHTTPServerTransport
-5. Send response
-6. Cleanup server & transport
-```
-
-### Benefits
-
-- ✅ **Memory Efficient**: No persistent state
-- ✅ **Error Isolation**: Request failures don't affect others  
-- ✅ **Scalable**: Independent request processing
-- ✅ **Simple Debugging**: Clear request boundaries
-
-## 📝 Next Steps
-
-After successful setup:
-
-1. **Explore MCP Tools**: Try all available tools in your MCP client
-2. **Understand Architecture**: Review the stateless design above
-3. **Customize Integration**: Modify the bridge for your specific needs
-4. **Add Custom Tools**: Extend the server with additional MCP tools using `registerTool()`
-5. **Production Deployment**: Consider deployment options for team use
-
-## 🆘 Getting Help
-
-If you encounter issues:
-
-1. Check this troubleshooting guide
-2. Review server and plugin logs
-3. Test with minimal configuration
-4. Check the main README.md for additional information
-
-## 🔗 Useful Commands
-
-```bash
-# Install dependencies
-npm install
-
-# Start server
-npm start
-
-# Development mode
-npm run dev
-
-# Check server health
-curl http://localhost:6000/health
-
-# View server logs with timestamps
-npm start 2>&1 | while IFS= read -r line; do echo "$(date '+%Y-%m-%d %H:%M:%S') $line"; done
-
-# Kill process on port 6000 (if needed)
-lsof -ti:6000 | xargs kill -9
-```
