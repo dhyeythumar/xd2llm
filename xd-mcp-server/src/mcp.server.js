@@ -22,8 +22,9 @@ export default class MCPServer {
         };
     }
 
-    #returnMcpSuccessResponse(message) {
-        return {
+    #returnMcpSuccessResponse(message, extraDetails = {}) {
+        // Initialize response with message
+        const response = {
             content: [
                 {
                     type: 'text',
@@ -31,6 +32,13 @@ export default class MCPServer {
                 },
             ],
         };
+
+        // Add extra details if provided
+        if (extraDetails && Object.keys(extraDetails).length > 0) {
+            response.content.push(extraDetails);
+        }
+
+        return response;
     }
 
     #getServer() {
@@ -63,14 +71,12 @@ export default class MCPServer {
         );
 
         mcpServer.registerTool(
-            'get_selected_xd_node_json',
+            'get_selected_xd_node',
             {
                 description:
-                    'Get details of the currently selected node in Adobe XD in JSON format. Returns comprehensive design specifications including dimensions, visual properties, typography, and more.',
+                    'Get details of the currently selected node in Adobe XD in JSON & image format. Returns comprehensive design specifications including dimensions, visual properties, typography, base64 encoded image, and more.',
             },
-            async () => await this.#getSelectedNodeJSON()
-        );
-
+            async () => await this.#getSelectedNode()
         );
     }
 
@@ -82,38 +88,35 @@ export default class MCPServer {
         });
     }
 
-    // MCP tool to get selected node JSON
-    async #getSelectedNodeJSON() {
+    // MCP tool to get selected node
+    async #getSelectedNode() {
         try {
             if (!this.wsServer.isConnected()) {
                 throw new Error('No Adobe XD plugin connected. Please ensure the XD plugin is installed and running.');
             }
 
-            const selectedNodeJSON = await this.wsServer.requestSelectedNodeJSON();
-            if (!selectedNodeJSON) {
-                throw new Error('Export failed. Please ensure node is selected in Adobe XD and try again');
+            const selectedNode = await this.wsServer.requestSelectedNode();
+            if (!selectedNode || !selectedNode.json || !selectedNode.image) {
+                throw new Error(
+                    'Failed to get selected node. Please ensure node is selected in Adobe XD and try again'
+                );
             }
 
-            return this.#returnMcpSuccessResponse(selectedNodeJSON);
+            return this.#returnMcpSuccessResponse(selectedNode.json, {
+                type: 'image',
+                data: selectedNode.image,
+                mimeType: 'image/png',
+            });
         } catch (error) {
             return this.#returnMcpErrorResponse({
-                message: 'Error getting selection JSON from Adobe XD',
+                message: 'Error getting selection from Adobe XD',
                 error: error.message,
             });
         }
     }
 
-        } catch (error) {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: `Error getting selection data from Adobe XD: ${error.message}`,
-                    },
-                ],
-                isError: true,
-            };
-        }
+    constructor(wsServer) {
+        this.wsServer = wsServer;
     }
 
     // Stateless MCP request handler, that creates server & transport on the fly

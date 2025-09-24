@@ -30,12 +30,8 @@ class WSConnector {
                 console.info(`Received connection ID: ${this.connectionId}`);
                 break;
 
-            case 'request_selected_node_json':
-                this.#sendSelectedNodeJSON();
-                break;
-
-            case 'request_selected_node_image':
-                this.#sendSelectedNodeImage();
+            case 'request_selected_node':
+                this.#sendSelectedNode();
                 break;
 
             case 'pong':
@@ -63,51 +59,26 @@ class WSConnector {
     }
 
     /**
-     * Send current selected node data in JSON format to server
+     * Send current selected node data to server
      */
-    async #sendSelectedNodeJSON() {
+    async #sendSelectedNode() {
         try {
-            if (!this.selectionData) throw new Error('No selected node!');
+            console.log('selectedNode', this.selectedNode);
+            if (!this.selectedNode.json || !this.selectedNode.image) {
+                throw new Error('No selected node!');
+            }
 
             // Send via WebSocket
             const message = {
-                type: 'selected_node_json',
-                payload: this.selectionData,
+                type: 'selected_node',
+                payload: this.selectedNode,
             };
 
             if (!this.#sendMessage(message)) {
                 throw new Error('Failed to send websocket message');
             }
         } catch (error) {
-            console.error('Failed to send selected node in JSON format:', error);
-
-            // Send error message to server
-            this.#sendMessage({
-                type: 'error',
-                message: error.message,
-            });
-        }
-    }
-
-    /**
-     * Send current selected node data in image format to server
-     * TODO :: check this
-     */
-    async #sendSelectedNodeImage() {
-        try {
-            if (!this.selectionData) throw new Error('No selected node!');
-
-            // Send via WebSocket
-            const message = {
-                type: 'selected_node_image',
-                payload: this.selectionData,
-            };
-
-            if (!this.#sendMessage(message)) {
-                throw new Error('Failed to send websocket message');
-            }
-        } catch (error) {
-            console.error('Failed to send selected node in image format:', error);
+            console.error('Failed to send selected node:', error);
 
             // Send error message to server
             this.#sendMessage({
@@ -213,7 +184,12 @@ class WSConnector {
         this.reconnectAttempts = 0;
         this.reconnectTimer = null;
         this.connectionId = null;
-        this.selectionData = null;
+
+        // XD Selection data
+        this.selectedNode = {
+            json: null,
+            image: null,
+        };
 
         // Callback for connection status changes
         this.onConnectionStatusChange = null;
@@ -227,8 +203,18 @@ class WSConnector {
     /**
      * Handle selection change events from XD
      */
-    handleSelectionChange(selectionData) {
-        this.selectionData = selectionData;
+    handleSelectionChange(selectedNode) {
+        // If a node is selected, set the selected node to the node
+        if (selectedNode) {
+            this.selectedNode = selectedNode;
+        }
+        // If no node is selected, set the selected node to null to indicate that no node is selected
+        else {
+            this.selectedNode = {
+                json: null,
+                image: null,
+            };
+        }
     }
 
     /**

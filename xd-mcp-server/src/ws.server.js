@@ -27,16 +27,10 @@ export default class WSServer extends EventEmitter {
      */
     #handleWebSocketMessage(connectionId, data) {
         switch (data.type) {
-            case 'selected_node_json':
+            case 'selected_node':
                 logger.ws('received', connectionId, `${data.type} message`);
                 // Emit event for listeners to handle the response
-                this.emit('selected_node_json', data.payload);
-                break;
-
-            case 'selected_node_image':
-                logger.ws('received', connectionId, `${data.type} message`);
-                // Emit event for listeners to handle the response
-                this.emit('selected_node_image', data.payload);
+                this.emit('selected_node', data.payload);
                 break;
 
             case 'ping':
@@ -124,12 +118,12 @@ export default class WSServer extends EventEmitter {
         });
     }
 
-    // Send request for current selected node in JSON format to XD plugin and wait for response
-    async requestSelectedNodeJSON(timeout = 5000) {
+    // Send request for current selected node to XD plugin and wait for response
+    async requestSelectedNode(timeout = 5000) {
         if (!this.isConnected()) throw new Error('No XD plugin connected');
 
         const message = {
-            type: 'request_selected_node_json',
+            type: 'request_selected_node',
         };
 
         logger.ws('sending', this.xdConnectionId, `${message.type} message`);
@@ -137,87 +131,38 @@ export default class WSServer extends EventEmitter {
         return new Promise((resolve, reject) => {
             // Set up timeout
             const timeoutId = setTimeout(() => {
-                this.removeListener('selected_node_json', onSelectedNodeJSON);
+                this.removeListener('selected_node', onSelectedNode);
                 this.removeListener('xd_error', onError);
-                logger.ws('timeout', this.xdConnectionId, `selected_node_json request after ${timeout}ms`);
-                reject(new Error('Selected node JSON request timeout'));
+                logger.ws('timeout', this.xdConnectionId, `selected_node request after ${timeout}ms`);
+                reject(new Error('Selected node request timeout'));
             }, timeout);
 
             // Set up event listeners
-            const onSelectedNodeJSON = (data) => {
+            const onSelectedNode = (data) => {
                 clearTimeout(timeoutId);
                 this.removeListener('xd_error', onError);
-                logger.ws('response-received', this.xdConnectionId, 'selected_node_json received successfully');
+                logger.ws('response-received', this.xdConnectionId, 'selected_node received successfully');
                 resolve(data);
             };
 
             const onError = (error) => {
                 clearTimeout(timeoutId);
-                this.removeListener('selected_node_json', onSelectedNodeJSON);
+                this.removeListener('selected_node', onSelectedNode);
                 logger.ws('response-error', this.xdConnectionId, error.message);
                 reject(error);
             };
 
             // Listen for response
-            this.once('selected_node_json', onSelectedNodeJSON);
+            this.once('selected_node', onSelectedNode);
             this.once('xd_error', onError);
 
             // Send the request
             if (!this.#sendMessage(message)) {
                 clearTimeout(timeoutId);
-                this.removeListener('selected_node_json', onSelectedNodeJSON);
+                this.removeListener('selected_node', onSelectedNode);
                 this.removeListener('xd_error', onError);
                 logger.ws('send-failed', this.xdConnectionId, 'Failed to send message');
-                reject(new Error('Failed to send selected node JSON request to XD plugin'));
-            }
-        });
-    }
-
-    // Send request for current selected node in image format to XD plugin and wait for response
-    async requestSelectedNodeImage(timeout = 5000) {
-        if (!this.isConnected()) throw new Error('No XD plugin connected');
-
-        const message = {
-            type: 'request_selected_node_image',
-        };
-
-        logger.ws('sending', this.xdConnectionId, `${message.type} message`);
-
-        return new Promise((resolve, reject) => {
-            // Set up timeout
-            const timeoutId = setTimeout(() => {
-                this.removeListener('selected_node_image', onSelectedNodeImage);
-                this.removeListener('xd_error', onError);
-                logger.ws('timeout', this.xdConnectionId, `selected_node_image request after ${timeout}ms`);
-                reject(new Error('Selected node image request timeout'));
-            }, timeout);
-
-            // Set up event listeners
-            const onSelectedNodeImage = (data) => {
-                clearTimeout(timeoutId);
-                this.removeListener('xd_error', onError);
-                logger.ws('response-received', this.xdConnectionId, 'selected_node_image received successfully');
-                resolve(data);
-            };
-
-            const onError = (error) => {
-                clearTimeout(timeoutId);
-                this.removeListener('selected_node_image', onSelectedNodeImage);
-                logger.ws('response-error', this.xdConnectionId, error.message);
-                reject(error);
-            };
-
-            // Listen for response
-            this.once('selected_node_image', onSelectedNodeImage);
-            this.once('xd_error', onError);
-
-            // Send the request
-            if (!this.#sendMessage(message)) {
-                clearTimeout(timeoutId);
-                this.removeListener('selected_node_image', onSelectedNodeImage);
-                this.removeListener('xd_error', onError);
-                logger.ws('send-failed', this.xdConnectionId, 'Failed to send message');
-                reject(new Error('Failed to send selected node image request to XD plugin'));
+                reject(new Error('Failed to send selected node request to XD plugin'));
             }
         });
     }

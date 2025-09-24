@@ -1,3 +1,6 @@
+const application = require('application');
+const fs = require('uxp').storage.localFileSystem;
+const storage = require('uxp').storage;
 const clipboard = require('clipboard');
 
 class UIHelper {
@@ -48,9 +51,66 @@ function copyToClipboard(event, contentId) {
     }, 2000);
 }
 
+/**
+ * Convert ArrayBuffer to base64 string
+ * @param {ArrayBuffer} buffer - The ArrayBuffer to convert
+ * @returns {string} Base64 encoded string
+ */
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
+
+/**
+ * Export XD node as base64 encoded PNG image
+ * @param {Object} node - The XD node to export
+ * @returns {Promise<string>} Base64 encoded image string
+ */
+async function exportNodeAsBase64(node) {
+    try {
+        // Create a temporary file to store the rendition
+        const tempFolder = await fs.getTemporaryFolder();
+        const file = await tempFolder.createFile('rendition.png', { overwrite: true });
+
+        // Define rendition settings
+        const renditionSettings = [
+            {
+                node: node,
+                outputFile: file,
+                type: application.RenditionType.PNG,
+                scale: 4,
+            },
+        ];
+
+        // Create the rendition using Adobe XD's official API
+        await application.createRenditions(renditionSettings);
+
+        // Read the file and convert to base64
+        const fileContents = await file.read({ format: storage.formats.binary });
+
+        if (!fileContents || fileContents.length === 0) {
+            throw new Error('Rendition file is empty');
+        }
+
+        const base64String = arrayBufferToBase64(fileContents);
+
+        return base64String;
+    } catch (error) {
+        console.error('Error exporting node as base64:', error);
+
+        return '';
+    }
+}
+
 module.exports = {
     UIHelper,
     rgbToHex,
     rgbaToHex,
     copyToClipboard,
+    arrayBufferToBase64,
+    exportNodeAsBase64,
 };

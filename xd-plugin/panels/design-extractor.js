@@ -16,7 +16,7 @@ const { selection, Text } = require('scenegraph');
 
 const extractTextProperties = require('../extractors/text.js');
 const extractBackgroundProperties = require('../extractors/background.js');
-const { UIHelper, copyToClipboard } = require('../utils/helper.js');
+const { UIHelper, copyToClipboard, exportNodeAsBase64 } = require('../utils/helper.js');
 const WSConnector = require('../services/ws-connector.js');
 
 // Initialize WebSocket connector
@@ -258,6 +258,10 @@ function create() {
     return designPanel;
 }
 
+// -------------------------------------------------------------
+// WebSocket Connection Functions
+// -------------------------------------------------------------
+
 /**
  * Update connection status indicator
  */
@@ -301,6 +305,19 @@ function updateConnectionStatus(isConnected, reconnectAttempts = 0) {
         }
     }
 }
+
+async function sendSelectedNode(designInfo, selectedNode) {
+    const base64Image = await exportNodeAsBase64(selectedNode);
+
+    wsConnector.handleSelectionChange({
+        json: designInfo,
+        image: base64Image,
+    });
+}
+
+// -------------------------------------------------------------
+// Design Info Extraction Functions
+// -------------------------------------------------------------
 
 /**
  * Extract comprehensive design information from XD Node
@@ -499,16 +516,18 @@ function update() {
 
     if (!designPanel) return;
 
-    const selectedItem = selection?.items?.[0];
-    if (!selectedItem) {
+    const selectedNode = selection?.items?.[0];
+    if (!selectedNode) {
         UIHelper.toggleSpecContent(designPanel, false);
         return;
     }
 
     // Extract design information recursively
-    const designInfo = extractDesignInfo(selectedItem);
-    wsConnector.handleSelectionChange(designInfo);
+    const designInfo = extractDesignInfo(selectedNode);
     displayDesignInfo(designInfo);
+
+    // Send selected node to server
+    sendSelectedNode(designInfo, selectedNode);
 
     UIHelper.toggleSpecContent(designPanel, true);
 }
