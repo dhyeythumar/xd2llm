@@ -9,32 +9,118 @@ const PING_INTERVAL = 10000;
 const PORT = 4000;
 
 class WSConnector {
-    constructor(options = {}) {
-        this.serverUrl = options.serverUrl || `http://localhost:${PORT}`;
-        this.wsUrl = options.wsUrl || `ws://localhost:${PORT}`;
-        this.reconnectInterval = options.reconnectInterval || 5000;
-        this.maxReconnectAttempts = options.maxReconnectAttempts || 5;
+    /**
+     * Send message to connected XD plugin
+     */
+    #sendMessage(message) {
+        if (this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message));
+            return true;
+        }
+        return false;
+    }
 
-        this.ws = null;
-        this.isConnected = false;
-        this.reconnectAttempts = 0;
-        this.reconnectTimer = null;
-        this.connectionId = null;
-        this.selectionData = null;
+    /**
+     * Handle messages from WebSocket server
+     */
+    #handleServerMessage(data) {
+        switch (data.type) {
+            case 'welcome':
+                this.connectionId = data.connectionId;
+                console.info(`Received connection ID: ${this.connectionId}`);
+                break;
 
-        // Callback for connection status changes
-        this.onConnectionStatusChange = null;
+            case 'request_selected_node_json':
+                this.#sendSelectedNodeJSON();
+                break;
 
-        // Bind methods to preserve 'this' context
-        this.handleSelectionChange = this.handleSelectionChange.bind(this);
+            case 'request_selected_node_image':
+                this.#sendSelectedNodeImage();
+                break;
 
-        this.connect();
+            case 'pong':
+                console.info('Received pong from server');
+                break;
+
+            default:
+                console.warn('Unknown message type from server:', data.type);
+        }
+    }
+
+    /**
+     * Send ping to server to check connection
+     */
+    #ping() {
+        setInterval(() => {
+            const message = {
+                type: 'ping',
+                timestamp: Date.now(),
+            };
+
+            if (this.#sendMessage(message)) console.info('Sent ping to WebSocket server');
+            else console.warn('Failed to send ping to WebSocket server');
+        }, PING_INTERVAL);
+    }
+
+    /**
+     * Send current selected node data in JSON format to server
+     */
+    async #sendSelectedNodeJSON() {
+        try {
+            if (!this.selectionData) throw new Error('No selected node!');
+
+            // Send via WebSocket
+            const message = {
+                type: 'selected_node_json',
+                payload: this.selectionData,
+            };
+
+            if (!this.#sendMessage(message)) {
+                throw new Error('Failed to send websocket message');
+            }
+        } catch (error) {
+            console.error('Failed to send selected node in JSON format:', error);
+
+            // Send error message to server
+            this.#sendMessage({
+                type: 'error',
+                message: error.message,
+            });
+        }
+    }
+
+    /**
+     * Send current selected node data in image format to server
+     * TODO :: check this
+     */
+    async #sendSelectedNodeImage() {
+        try {
+            if (!this.selectionData) throw new Error('No selected node!');
+
+            // Send via WebSocket
+            const message = {
+                type: 'selected_node_image',
+                payload: this.selectionData,
+            };
+
+            if (!this.#sendMessage(message)) {
+                throw new Error('Failed to send websocket message');
+            }
+        } catch (error) {
+            console.error('Failed to send selected node in image format:', error);
+
+            // Send error message to server
+            this.#sendMessage({
+                type: 'error',
+                message: error.message,
+            });
+        }
     }
 
     /**
      * Connect to WebSocket server
      */
-    connect() {
+    #connect() {
         if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
             return;
         }
@@ -56,13 +142,13 @@ class WSConnector {
 
                 // Notify UI about connection
                 this.notifyConnectionStatusChange(true, 0);
-                this.ping();
+                this.#ping();
             };
 
             this.ws.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    this.handleServerMessage(data);
+                    this.#handleServerMessage(data);
                 } catch (error) {
                     console.error('Error parsing server message:', error);
                 }
@@ -75,7 +161,7 @@ class WSConnector {
 
                 // Notify UI about disconnection
                 this.notifyConnectionStatusChange(false, this.reconnectAttempts);
-                this.scheduleReconnect();
+                this.#scheduleReconnect();
             };
 
             this.ws.onerror = (error) => {
@@ -87,14 +173,14 @@ class WSConnector {
             };
         } catch (error) {
             console.error('Failed to connect to WebSocket server:', error);
-            this.scheduleReconnect();
+            this.#scheduleReconnect();
         }
     }
 
     /**
      * Schedule reconnection attempt
      */
-    scheduleReconnect() {
+    #scheduleReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             console.error('Max reconnection attempts reached. Giving up.');
             return;
@@ -112,99 +198,30 @@ class WSConnector {
 
         this.reconnectTimer = setTimeout(() => {
             this.reconnectTimer = null;
-            this.connect();
+            this.#connect();
         }, delay);
     }
 
-    /**
-     * Handle messages from WebSocket server
-     */
-    handleServerMessage(data) {
-        switch (data.type) {
-            case 'welcome':
-                this.connectionId = data.connectionId;
-                console.info(`Received connection ID: ${this.connectionId}`);
-                break;
+    constructor(options = {}) {
+        this.serverUrl = options.serverUrl || `http://localhost:${PORT}`;
+        this.wsUrl = options.wsUrl || `ws://localhost:${PORT}`;
+        this.reconnectInterval = options.reconnectInterval || 5000;
+        this.maxReconnectAttempts = options.maxReconnectAttempts || 5;
 
-            case 'request_selected_node_json':
-                this.sendSelectedNodeJSON();
-                break;
+        this.ws = null;
+        this.isConnected = false;
+        this.reconnectAttempts = 0;
+        this.reconnectTimer = null;
+        this.connectionId = null;
+        this.selectionData = null;
 
-            case 'request_selected_node_image':
-                this.sendSelectedNodeImage();
-                break;
+        // Callback for connection status changes
+        this.onConnectionStatusChange = null;
 
-            case 'pong':
-                console.info('Received pong from server');
-                break;
+        // Bind methods to preserve 'this' context
+        this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
-            default:
-                console.warn('Unknown message type from server:', data.type);
-        }
-    }
-
-    // Send message to connected XD plugin
-    sendMessage(message) {
-        if (this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message));
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Send current selected node data in JSON format to server
-     */
-    async sendSelectedNodeJSON() {
-        try {
-            if (!this.selectionData) throw new Error('No selected node!');
-
-            // Send via WebSocket
-            const message = {
-                type: 'selected_node_json',
-                payload: this.selectionData,
-            };
-
-            if (!this.sendMessage(message)) {
-                throw new Error('Failed to send websocket message');
-            }
-        } catch (error) {
-            console.error('Failed to send selected node in JSON format:', error);
-
-            // Send error message to server
-            this.sendMessage({
-                type: 'error',
-                message: error.message,
-            });
-        }
-    }
-
-    /**
-     * Send current selected node data in image format to server
-     * TODO :: check this
-     */
-    async sendSelectedNodeImage() {
-        try {
-            if (!this.selectionData) throw new Error('No selected node!');
-
-            // Send via WebSocket
-            const message = {
-                type: 'selected_node_image',
-                payload: this.selectionData,
-            };
-
-            if (!this.sendMessage(message)) {
-                throw new Error('Failed to send websocket message');
-            }
-        } catch (error) {
-            console.error('Failed to send selected node in image format:', error);
-
-            // Send error message to server
-            this.sendMessage({
-                type: 'error',
-                message: error.message,
-            });
-        }
+        this.#connect();
     }
 
     /**
@@ -228,24 +245,6 @@ class WSConnector {
         if (this.onConnectionStatusChange) {
             this.onConnectionStatusChange(isConnected, reconnectAttempts);
         }
-    }
-
-    /**
-     * Send ping to server to check connection
-     */
-    ping() {
-        setInterval(() => {
-            const message = {
-                type: 'ping',
-                timestamp: Date.now(),
-            };
-
-            if (this.sendMessage(message)) {
-                console.info('Sent ping to WebSocket server');
-            } else {
-                console.warn('Failed to send ping to WebSocket server');
-            }
-        }, PING_INTERVAL);
     }
 
     /**
@@ -276,11 +275,11 @@ class WSConnector {
         this.notifyConnectionStatusChange(false, 0);
 
         // Start fresh connection
-        this.connect();
+        this.#connect();
     }
 
     /**
-     * Disconnect from server
+     * Disconnect from WebSocket server
      */
     disconnect() {
         if (this.reconnectTimer) {

@@ -19,58 +19,51 @@ import logger from './logger.js';
 const PORT = 4000;
 
 class Server {
-    constructor() {
-        this.wsServer = new WSServer();
-        this.mcpServer = new MCPServer(this.wsServer);
+    #app;
+    #wsServer;
+    #mcpServer;
+    #httpServer;
+    #connections;
+    #currentPort;
+    #startTime;
 
-        this.httpServer = null;
-        this.app = express();
-        this.connections = new Set(); // Track active connections
-
-        // Server information
-        this.currentPort = null;
-        this.startTime = null;
-
-        this.setupHTTPServer();
-    }
-
-    setupHTTPServer() {
-        this.app.use(
+    #setupHTTPServer() {
+        this.#app.use(
             cors({
                 origin: '*',
                 exposedHeaders: ['Mcp-Session-Id'],
                 allowedHeaders: ['Content-Type', 'mcp-session-id'],
             })
         );
-        this.app.use(express.json({ limit: '10mb' }));
+        this.#app.use(express.json({ limit: '10mb' }));
 
         // Add MCP HTTP transport endpoint to the existing WebSocket server
-        this.app.all('/mcp', async (req, res) => {
-            await this.mcpServer.handleRequest(req, res);
+        this.#app.all('/mcp', async (req, res) => {
+            await this.#mcpServer.handleRequest(req, res);
         });
 
         // Health check endpoint for testing
-        this.app.get('/health', (_, res) => {
+        this.#app.get('/health', (_, res) => {
             res.json({
                 status: 'ok',
                 xdPlugin: {
-                    connected: this.wsServer.isConnected(),
-                    connectionId: this.wsServer.getConnectionId(),
+                    connected: this.#wsServer.isConnected(),
+                    connectionId: this.#wsServer.getConnectionId(),
                 },
                 serverInfo: {
-                    port: this.currentPort,
                     name: 'xd-mcp-server',
                     version: '1.0.0',
                     pid: process.pid,
-                    startTime: this.startTime,
+                    startTime: this.#startTime,
+                    port: this.#currentPort,
                 },
             });
         });
 
-        // Selection endpoint for testing
-        this.app.get('/selection', async (_, res) => {
+        // Selection endpoint for testing (TODO :: deprecated)
+        this.#app.get('/selection', async (_, res) => {
             try {
-                const selectedNodeData = await this.wsServer.requestSelectedNodeJSON();
+                const selectedNodeData = await this.#wsServer.requestSelectedNodeJSON();
                 res.json({
                     status: 'ok',
                     selectedNodeData,
@@ -84,31 +77,46 @@ class Server {
         });
     }
 
+    constructor() {
+        this.#wsServer = new WSServer();
+        this.#mcpServer = new MCPServer(this.#wsServer);
+
+        this.#httpServer = null;
+        this.#app = express();
+        this.#connections = new Set(); // Track active connections
+
+        // Server information
+        this.#currentPort = null;
+        this.#startTime = null;
+
+        this.#setupHTTPServer();
+    }
+
     start(port) {
         try {
             return new Promise((resolve, reject) => {
                 try {
                     // Start HTTP server
-                    this.httpServer = this.app.listen(port, async () => {
-                        this.currentPort = port;
-                        this.startTime = new Date().toISOString();
+                    this.#httpServer = this.#app.listen(port, async () => {
+                        this.#currentPort = port;
+                        this.#startTime = new Date().toISOString();
                         logger.server('http-server-started', `HTTP server listening on port ${port}`);
 
                         // Setup WebSocket server
-                        this.wsServer.setupWSServer(this.httpServer);
+                        this.#wsServer.setupWSServer(this.#httpServer);
 
                         resolve();
                     });
 
                     // Track connections for proper shutdown
-                    this.httpServer.on('connection', (socket) => {
-                        this.connections.add(socket);
+                    this.#httpServer.on('connection', (socket) => {
+                        this.#connections.add(socket);
                         socket.on('close', () => {
-                            this.connections.delete(socket);
+                            this.#connections.delete(socket);
                         });
                     });
 
-                    this.httpServer.on('error', (error) => {
+                    this.#httpServer.on('error', (error) => {
                         reject(error);
                     });
                 } catch (error) {
@@ -124,22 +132,22 @@ class Server {
     async close() {
         try {
             // Close WebSocket server first
-            if (this.wsServer) {
-                await this.wsServer.close();
+            if (this.#wsServer) {
+                await this.#wsServer.close();
             }
 
             // Close HTTP server with timeout
-            if (this.httpServer) {
+            if (this.#httpServer) {
                 // First, destroy all existing connections
-                for (const socket of this.connections) {
+                for (const socket of this.#connections) {
                     socket.destroy();
                 }
-                this.connections.clear();
+                this.#connections.clear();
 
                 // Close the server with a timeout
                 await Promise.race([
                     new Promise((resolve) => {
-                        this.httpServer.close(() => {
+                        this.#httpServer.close(() => {
                             logger.server('http-closed', 'HTTP server closed successfully');
                             resolve();
                         });
