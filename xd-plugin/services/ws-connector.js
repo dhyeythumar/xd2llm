@@ -9,12 +9,23 @@ const PING_INTERVAL = 10000;
 const PORT = 4000;
 
 class WSConnector {
+    #wsUrl;
+    #reconnectInterval;
+    #maxReconnectAttempts;
+    #ws;
+    #isConnected;
+    #reconnectAttempts;
+    #reconnectTimer;
+    #connectionId;
+    #selectedNode;
+    #onConnectionStatusChange;
+
     /**
      * Send message to connected XD plugin
      */
     #sendMessage(message) {
-        if (this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message));
+        if (this.#isConnected && this.#ws && this.#ws.readyState === WebSocket.OPEN) {
+            this.#ws.send(JSON.stringify(message));
             return true;
         }
         return false;
@@ -26,8 +37,8 @@ class WSConnector {
     #handleServerMessage(data) {
         switch (data.type) {
             case 'welcome':
-                this.connectionId = data.connectionId;
-                console.info(`Received connection ID: ${this.connectionId}`);
+                this.#connectionId = data.connectionId;
+                console.info(`Received connection ID: ${this.#connectionId}`);
                 break;
 
             case 'request_selected_node':
@@ -63,15 +74,14 @@ class WSConnector {
      */
     async #sendSelectedNode() {
         try {
-            console.log('selectedNode', this.selectedNode);
-            if (!this.selectedNode.json || !this.selectedNode.image) {
+            if (!this.#selectedNode.json || !this.#selectedNode.image) {
                 throw new Error('No selected node!');
             }
 
             // Send via WebSocket
             const message = {
                 type: 'selected_node',
-                payload: this.selectedNode,
+                payload: this.#selectedNode,
             };
 
             if (!this.#sendMessage(message)) {
@@ -92,31 +102,30 @@ class WSConnector {
      * Connect to WebSocket server
      */
     #connect() {
-        if (this.ws && (this.ws.readyState === WebSocket.CONNECTING || this.ws.readyState === WebSocket.OPEN)) {
+        if (this.#ws && (this.#ws.readyState === WebSocket.CONNECTING || this.#ws.readyState === WebSocket.OPEN)) {
             return;
         }
 
         try {
             console.info('Connecting to WebSocket Server...');
-            this.ws = new WebSocket(this.wsUrl);
+            this.#ws = new WebSocket(this.#wsUrl);
 
-            this.ws.onopen = () => {
+            this.#ws.onopen = () => {
                 console.info('Connected to WebSocket Server');
-                this.isConnected = true;
-                this.reconnectAttempts = 0;
+                this.#isConnected = true;
+                this.#reconnectAttempts = 0;
 
                 // Clear any existing reconnect timer
-                if (this.reconnectTimer) {
-                    clearTimeout(this.reconnectTimer);
-                    this.reconnectTimer = null;
+                if (this.#reconnectTimer) {
+                    clearTimeout(this.#reconnectTimer);
+                    this.#reconnectTimer = null;
                 }
 
-                // Notify UI about connection
-                this.notifyConnectionStatusChange(true, 0);
-                this.#ping();
+                this.notifyConnectionStatusChange(); // Notify UI about connection
+                this.#ping(); // Start pinging the server
             };
 
-            this.ws.onmessage = (event) => {
+            this.#ws.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
                     this.#handleServerMessage(data);
@@ -125,22 +134,22 @@ class WSConnector {
                 }
             };
 
-            this.ws.onclose = () => {
+            this.#ws.onclose = () => {
                 console.info('Disconnected from WebSocket Server');
-                this.isConnected = false;
-                this.connectionId = null;
+                this.#isConnected = false;
+                this.#connectionId = null;
 
                 // Notify UI about disconnection
-                this.notifyConnectionStatusChange(false, this.reconnectAttempts);
+                this.notifyConnectionStatusChange();
                 this.#scheduleReconnect();
             };
 
-            this.ws.onerror = (error) => {
+            this.#ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
-                this.isConnected = false;
+                this.#isConnected = false;
 
                 // Notify UI about error/disconnection
-                this.notifyConnectionStatusChange(false, this.reconnectAttempts);
+                this.notifyConnectionStatusChange();
             };
         } catch (error) {
             console.error('Failed to connect to WebSocket server:', error);
@@ -152,50 +161,46 @@ class WSConnector {
      * Schedule reconnection attempt
      */
     #scheduleReconnect() {
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        if (this.#reconnectAttempts >= this.#maxReconnectAttempts) {
             console.error('Max reconnection attempts reached. Giving up.');
             return;
         }
 
-        if (this.reconnectTimer) return; // Already scheduled
+        if (this.#reconnectTimer) return; // Already scheduled
 
-        this.reconnectAttempts++;
-        const delay = Math.min(this.reconnectInterval * this.reconnectAttempts, 30000);
+        this.#reconnectAttempts++;
+        const delay = Math.min(this.#reconnectInterval * this.#reconnectAttempts, 30000);
 
-        console.info(`Scheduling reconnection attempt ${this.reconnectAttempts} in ${delay}ms`);
+        console.info(`Scheduling reconnection attempt ${this.#reconnectAttempts} in ${delay}ms`);
 
         // Notify UI about reconnection attempt
-        this.notifyConnectionStatusChange(false, this.reconnectAttempts);
+        this.notifyConnectionStatusChange();
 
-        this.reconnectTimer = setTimeout(() => {
-            this.reconnectTimer = null;
+        this.#reconnectTimer = setTimeout(() => {
+            this.#reconnectTimer = null;
             this.#connect();
         }, delay);
     }
 
     constructor(options = {}) {
-        this.serverUrl = options.serverUrl || `http://localhost:${PORT}`;
-        this.wsUrl = options.wsUrl || `ws://localhost:${PORT}`;
-        this.reconnectInterval = options.reconnectInterval || 5000;
-        this.maxReconnectAttempts = options.maxReconnectAttempts || 5;
+        this.#wsUrl = options.wsUrl || `ws://localhost:${PORT}`;
+        this.#reconnectInterval = options.reconnectInterval || 5000;
+        this.#maxReconnectAttempts = options.maxReconnectAttempts || 5;
 
-        this.ws = null;
-        this.isConnected = false;
-        this.reconnectAttempts = 0;
-        this.reconnectTimer = null;
-        this.connectionId = null;
+        this.#ws = null;
+        this.#isConnected = false;
+        this.#reconnectAttempts = 0;
+        this.#reconnectTimer = null;
+        this.#connectionId = null;
 
         // XD Selection data
-        this.selectedNode = {
+        this.#selectedNode = {
             json: null,
             image: null,
         };
 
         // Callback for connection status changes
-        this.onConnectionStatusChange = null;
-
-        // Bind methods to preserve 'this' context
-        this.handleSelectionChange = this.handleSelectionChange.bind(this);
+        this.#onConnectionStatusChange = null;
 
         this.#connect();
     }
@@ -206,11 +211,11 @@ class WSConnector {
     handleSelectionChange(selectedNode) {
         // If a node is selected, set the selected node to the node
         if (selectedNode) {
-            this.selectedNode = selectedNode;
+            this.#selectedNode = selectedNode;
         }
         // If no node is selected, set the selected node to null to indicate that no node is selected
         else {
-            this.selectedNode = {
+            this.#selectedNode = {
                 json: null,
                 image: null,
             };
@@ -221,16 +226,27 @@ class WSConnector {
      * Set callback for connection status changes
      */
     setConnectionStatusCallback(callback) {
-        this.onConnectionStatusChange = callback;
+        this.#onConnectionStatusChange = callback;
     }
 
     /**
      * Notify about connection status change
      */
-    notifyConnectionStatusChange(isConnected, reconnectAttempts = 0) {
-        if (this.onConnectionStatusChange) {
-            this.onConnectionStatusChange(isConnected, reconnectAttempts);
+    notifyConnectionStatusChange() {
+        if (this.#onConnectionStatusChange) {
+            this.#onConnectionStatusChange();
         }
+    }
+
+    /**
+     * Get connection status
+     */
+    getConnectionStatus() {
+        return {
+            isConnected: this.#isConnected,
+            reconnectAttempts: this.#reconnectAttempts,
+            maxReconnectAttempts: this.#maxReconnectAttempts,
+        };
     }
 
     /**
@@ -239,26 +255,11 @@ class WSConnector {
     manualReconnect() {
         console.info('Manual reconnection triggered');
 
-        // Reset retry attempts
-        this.reconnectAttempts = 0;
-
-        // Clear any existing reconnect timer
-        if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer);
-            this.reconnectTimer = null;
-        }
-
-        // Close existing connection if any
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-
-        this.isConnected = false;
-        this.connectionId = null;
+        // Disconnect from WebSocket server
+        this.disconnect();
 
         // Notify UI about the manual reconnection attempt
-        this.notifyConnectionStatusChange(false, 0);
+        this.notifyConnectionStatusChange();
 
         // Start fresh connection
         this.#connect();
@@ -268,18 +269,21 @@ class WSConnector {
      * Disconnect from WebSocket server
      */
     disconnect() {
-        if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer);
-            this.reconnectTimer = null;
+        // Reset retry attempts
+        this.#reconnectAttempts = 0;
+
+        if (this.#reconnectTimer) {
+            clearTimeout(this.#reconnectTimer);
+            this.#reconnectTimer = null;
         }
 
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
+        if (this.#ws) {
+            this.#ws.close();
+            this.#ws = null;
         }
 
-        this.isConnected = false;
-        this.connectionId = null;
+        this.#isConnected = false;
+        this.#connectionId = null;
     }
 }
 

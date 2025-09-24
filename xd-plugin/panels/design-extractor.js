@@ -248,12 +248,10 @@ function create() {
     designPanel.querySelector('#copy-btn').addEventListener('click', (event) => copyToClipboard(event, '#output'));
 
     // Set up connection status callback
-    wsConnector.setConnectionStatusCallback((isConnected, reconnectAttempts) => {
-        updateConnectionStatus(isConnected, reconnectAttempts);
-    });
+    wsConnector.setConnectionStatusCallback(() => updateConnectionStatus());
 
     // Initialize with current connection status
-    updateConnectionStatus(wsConnector.isConnected, wsConnector.reconnectAttempts);
+    updateConnectionStatus();
 
     return designPanel;
 }
@@ -265,9 +263,10 @@ function create() {
 /**
  * Update connection status indicator
  */
-function updateConnectionStatus(isConnected, reconnectAttempts = 0) {
+function updateConnectionStatus() {
     if (!designPanel) return;
 
+    const { isConnected, reconnectAttempts, maxReconnectAttempts } = wsConnector.getConnectionStatus();
     const statusElement = designPanel.querySelector('#connection-status');
     const dotElement = designPanel.querySelector('.connection-dot');
     const textElement = designPanel.querySelector('#connection-text');
@@ -285,17 +284,17 @@ function updateConnectionStatus(isConnected, reconnectAttempts = 0) {
         statusElement.classList.add('connected');
         dotElement.classList.add('connected');
         textElement.textContent = 'Connected with WebSocket Server';
-    } else if (reconnectAttempts > 0 && reconnectAttempts < wsConnector.maxReconnectAttempts) {
+    } else if (reconnectAttempts > 0 && reconnectAttempts < maxReconnectAttempts) {
         // Reconnecting state
         statusElement.classList.add('reconnecting');
         dotElement.classList.add('reconnecting');
-        textElement.textContent = `Reconnecting (${reconnectAttempts}/${wsConnector.maxReconnectAttempts})`;
+        textElement.textContent = `Reconnecting (${reconnectAttempts}/${maxReconnectAttempts})`;
     } else {
         // Disconnected state
         statusElement.classList.add('disconnected');
         dotElement.classList.add('disconnected');
 
-        if (reconnectAttempts >= wsConnector.maxReconnectAttempts) {
+        if (reconnectAttempts >= maxReconnectAttempts) {
             // Retries exhausted - show retry button
             textElement.textContent = 'Connection failed - retries exhausted';
             retryButton.classList.add('show');
@@ -497,11 +496,7 @@ function displayDesignInfo(designInfo) {
 function show(event) {
     wsConnector.handleSelectionChange(null);
 
-    if (!designPanel) {
-        event.node.appendChild(create());
-        // Update connection status when panel is shown
-        updateConnectionStatus(wsConnector.isConnected, wsConnector.reconnectAttempts);
-    }
+    if (!designPanel) event.node.appendChild(create());
 }
 
 function hide() {

@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 
 /**
- *
  * Single server process that handles both:
  * - WebSocket communication with Adobe XD plugin
  * - MCP HTTP endpoints for LLM clients
