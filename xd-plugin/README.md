@@ -1,28 +1,20 @@
 # Adobe XD Specifications Extractor Plugin
 
-A comprehensive Adobe XD plugin that extracts design specifications and communicates with AI assistants and Large Language Models (LLMs) for intelligent design-to-code workflows.
+Adobe XD plugin that extracts design specifications and communicates with AI assistants and Large Language Models (LLMs) for intelligent design-to-code workflows.
 
-## 🚀 Features
+## 🚀 Key Features
 
-### Core Capabilities
-
--   **Real-time Design Data Extraction**: Extract comprehensive design specifications from XD elements
--   **WebSocket Communication**: Real-time bridge to external services and MCP servers
--   **Multiple Export Formats**: Support for both JSON and SCSS output formats
--   **Image Export**: Optimized Base64 PNG export with configurable scaling
--   **Design Token Generation**: Automatic extraction of design tokens for design systems
+-   **📊 Real-time Design Extraction**: Extract comprehensive design specifications from XD elements
+-   **🌐 WebSocket Communication**: Real-time bridge to MCP servers and AI assistants
+-   **📋 Multiple Export Formats**: JSON (LLM-optimized) and SCSS output formats
+-   **🖼️ Image Export**: Optimized Base64 PNG export with configurable scaling
+-   **🎨 Design Token Generation**: Automatic extraction for design systems
 
 ### Supported Elements
 
 -   **Text Elements**: Complete typography specifications (font, size, color, spacing, alignment)
 -   **Shapes**: Rectangle, Ellipse with dimensions, borders, backgrounds
 -   **Groups**: Hierarchical structure with nested elements
-
-### LLM Integration
-
--   **AI-Optimized Output**: Structured data format designed for LLM consumption
--   **Component Hierarchy Mapping**: Semantic element classification for React component generation
--   **Real-time Communication**: Direct bridge to AI assistants via WebSocket protocol
 
 ## 📋 Output Formats
 
@@ -74,31 +66,29 @@ background-color: $background-primary;
 
 ## 🛠️ Installation
 
-### Development Mode Installation
+### Development Mode
 
 ```bash
-# Step 1: Install dependencies
+# Install dependencies
 npm install
 
-# Step 2: Install plugin in XD
+# Install plugin in XD
 npm run plugin:install
 
-# Step 3: Restart Adobe XD
+# Restart Adobe XD
 
-# Optional: Enable live reload for development
+# Optional: Enable live reload
 npm run plugin:watch
 ```
 
-### Production Installation
+### Production Mode
 
 ```bash
-# Step 1: Validate the plugin
+# Validate and package
 npm run plugin:validate
-
-# Step 2: Package the plugin
 npm run plugin:package
 
-# Step 3: Install the generated .xdx file in Adobe XD
+# Install the generated .xdx file in Adobe XD
 ```
 
 ## 🔧 Usage
@@ -127,26 +117,7 @@ The plugin provides two main panels accessible from the XD menu:
 
 ## 🌐 WebSocket Integration
 
-The plugin includes a built-in WebSocket connector for real-time communication with:
-
--   MCP (Model Context Protocol) servers
--   AI assistants and LLMs
-
-## 📈 Recent Updates
-
-### New Features
-
--   **Enhanced Element Support**: Improved extraction for complex nested structures
--   **Better Error Handling**: Graceful fallbacks for unsupported elements
--   **Optimized Data Structure**: Streamlined JSON output for faster LLM processing
-
-## 🔗 Integration with XD Ecosystem
-
-This plugin is part of the larger [XD Ecosystem](../README.md) that includes:
-
--   **XD MCP Server**: Bridge between XD and AI assistants
--   **Real-time Communication**: EventEmitter-based WebSocket architecture
--   **AI-Powered Workflows**: Direct integration with LLMs for design-to-code
+Built-in WebSocket connector for real-time communication with MCP servers and AI assistants.
 
 ## 📋 Prerequisites
 
@@ -205,16 +176,17 @@ npm run plugin:package    # Package for distribution
 
 MIT License - see [LICENSE](../LICENSE) file for details.
 
+## 🔗 Integration
+
+This plugin is part of the [XD Ecosystem](../README.md) that includes:
+
+-   **XD Server**: MCP server bridge between XD and AI assistants
+-   **Real-time Communication**: EventEmitter-based WebSocket architecture
+-   **AI-Powered Workflows**: Direct integration with LLMs for design-to-code
+
 ## 📚 References
 
 -   [Adobe XD UXP Documentation](https://developer.adobe.com/xd/uxp/)
 -   [Adobe XD SceneNode Reference](https://developer.adobe.com/xd/uxp/develop/reference/SceneNode/)
--   [XD Ecosystem Documentation](../README.md)
-
----
-
-**🔗 Related Links:**
-
--   [XD MCP Server](../xd-server/README.md)
--   [XD MCP Server Setup Guide](../xd-server/SETUP.md)
--   [Main Project Documentation](../README.md)
+-   [XD Server Documentation](../xd-server/README.md)
+-   [XD Server Setup Guide](../xd-server/SETUP.md)
