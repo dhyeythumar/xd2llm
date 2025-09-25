@@ -15,35 +15,35 @@ This document showcases the UI skeleton development improvements achieved using 
 
 ### Component 1: Easy complexity UI Skeleton
 
-| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| **Mockup** | **Before** | **After** |
 | :----: | :----: | :----: |
 | <img src="./images/results/Component%201%20-%20MockUp.png" class="component-image" alt="Component 1 MockUp" height="200"> | <img src="./images/results/Component%201%20-%20Before.png" class="component-image" alt="Component 1 Before" height="200"> | <img src="./images/results/Component%201%20-%20After.png" class="component-image" alt="Component 1 After" height="200"> |
-| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **With XD Plugin + MCP Server** |
 
 ### Component 2: Easy complexity UI Skeleton
 
-| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| **Mockup** | **Before** | **After** |
 | :----: | :----: | :----: |
 | <img src="./images/results/Component%202%20-%20MockUp.png" class="component-image" alt="Component 2 MockUp" height="200"> | <img src="./images/results/Component%202%20-%20Before.png" class="component-image" alt="Component 2 Before" height="200"> | <img src="./images/results/Component%202%20-%20After.png" class="component-image" alt="Component 2 After" height="200"> |
-| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **With XD Plugin + MCP Server** |
 
 Improvements: **+50% Structure Accuracy** Enhanced from 40% to 90% with proper HTML semantic structure and styles for easy complexity components.
 
 ### Component 3: Medium complexity UI Skeleton
 
-| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| **Mockup** | **Before** | **After** |
 | :----: | :----: | :----: |
 | <img src="./images/results/Component%203%20-%20MockUp.png" class="component-image" alt="Component 3 MockUp" height="200"> | <img src="./images/results/Component%203%20-%20Before.png" class="component-image" alt="Component 3 Before" height="200"> | <img src="./images/results/Component%203%20-%20After.png" class="component-image" alt="Component 3 After" height="200"> |
-| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **With XD Plugin + MCP Server** |
 
 Improvements: **+45% Structure Accuracy** Enhanced from 35% to 80% with clean component architecture for medium complexity components.
 
 ### Component 4: Hard complexity UI Skeleton
 
-| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| **Mockup** | **Before** | **After** |
 | :----: | :----: | :----: |
 | <img src="./images/results/Component%204%20-%20MockUp.png" class="component-image" alt="Component 4 MockUp" height="200"> | <img src="./images/results/Component%204%20-%20Before.png" class="component-image" alt="Component 4 Before" height="200"> | <img src="./images/results/Component%204%20-%20After.png" class="component-image" alt="Component 4 After" height="200"> |
-| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **With XD Plugin + MCP Server** |
 
 Improvements: **+40% Structure Accuracy** Enhanced from ~20% to ~60% with complex layout structure for hard complexity components.
 

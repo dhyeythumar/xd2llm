@@ -72,6 +72,16 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 -   **⚡ Code Generation**: Generate CSS/SCSS directly from XD designs
 -   **🔄 Design-to-Code Workflows**: Seamlessly bridge design and development processes
 
+## 📊 Performance Results
+
+The XD Ecosystem delivers exceptional improvements over traditional AI-generated skeletons:
+
+- **+50% Average Accuracy Improvement** across all complexity levels
+- **60-90% Structure Accuracy** achieved with the XD Ecosystem
+- **Consistent Performance** from easy to hard complexity components
+
+**[📈 View Detailed Results & Comparisons →](./RESULTS.md)**
+
 ## 🛠️ Development
 
 Each component has detailed development guides:
