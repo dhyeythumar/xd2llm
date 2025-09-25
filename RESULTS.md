@@ -2,16 +2,6 @@
 
 This document showcases the UI skeleton development improvements achieved using the XD Ecosystem (XD Plugin & XD Server with MCP), comparing it with traditional AI-generated skeletons by just using image to demonstrate enhanced accuracy and code quality for component structure generation.
 
-<style>
-.component-image {
-    width: 300px;
-    height: 200px;
-    object-fit: cover;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-</style>
-
 ## 📊 Component Skeleton Development Performance Metrics
 
 | Component                         | Traditional AI | XD Ecosystem | Absolute Improvement |
@@ -25,35 +15,35 @@ This document showcases the UI skeleton development improvements achieved using 
 
 ### Component 1: Easy complexity UI Skeleton
 
-| **Mockup**                                                                                                   | **Traditional AI Skeleton**                                                                                  | **XD Ecosystem (Plugin + MCP)**                                                                            |
-| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| <img src="./images/results/Component%201%20-%20MockUp.png" class="component-image" alt="Component 1 MockUp"> | <img src="./images/results/Component%201%20-%20Before.png" class="component-image" alt="Component 1 Before"> | <img src="./images/results/Component%201%20-%20After.png" class="component-image" alt="Component 1 After"> |
-| **Target Design**                                                                                            | **Traditional AI-Generated Skeleton**                                                                        | **XD Ecosystem (Plugin + MCP Server)**                                                                     |
+| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| :----: | :----: | :----: |
+| <img src="./images/results/Component%201%20-%20MockUp.png" class="component-image" alt="Component 1 MockUp" height="200"> | <img src="./images/results/Component%201%20-%20Before.png" class="component-image" alt="Component 1 Before" height="200"> | <img src="./images/results/Component%201%20-%20After.png" class="component-image" alt="Component 1 After" height="200"> |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
 
 ### Component 2: Easy complexity UI Skeleton
 
-| **Mockup**                                                                                                   | **Traditional AI Skeleton**                                                                                  | **XD Ecosystem (Plugin + MCP)**                                                                            |
-| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| <img src="./images/results/Component%202%20-%20MockUp.png" class="component-image" alt="Component 2 MockUp"> | <img src="./images/results/Component%202%20-%20Before.png" class="component-image" alt="Component 2 Before"> | <img src="./images/results/Component%202%20-%20After.png" class="component-image" alt="Component 2 After"> |
-| **Target Design**                                                                                            | **Traditional AI-Generated Skeleton**                                                                        | **XD Ecosystem (Plugin + MCP Server)**                                                                     |
+| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| :----: | :----: | :----: |
+| <img src="./images/results/Component%202%20-%20MockUp.png" class="component-image" alt="Component 2 MockUp" height="200"> | <img src="./images/results/Component%202%20-%20Before.png" class="component-image" alt="Component 2 Before" height="200"> | <img src="./images/results/Component%202%20-%20After.png" class="component-image" alt="Component 2 After" height="200"> |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
 
 Improvements: **+50% Structure Accuracy** Enhanced from 40% to 90% with proper HTML semantic structure and styles for easy complexity components.
 
 ### Component 3: Medium complexity UI Skeleton
 
-| **Mockup**                                                                                                   | **Traditional AI Skeleton**                                                                                  | **XD Ecosystem (Plugin + MCP)**                                                                            |
-| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| <img src="./images/results/Component%203%20-%20MockUp.png" class="component-image" alt="Component 3 MockUp"> | <img src="./images/results/Component%203%20-%20Before.png" class="component-image" alt="Component 3 Before"> | <img src="./images/results/Component%203%20-%20After.png" class="component-image" alt="Component 3 After"> |
-| **Target Design**                                                                                            | **Traditional AI-Generated Skeleton**                                                                        | **XD Ecosystem (Plugin + MCP Server)**                                                                     |
+| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| :----: | :----: | :----: |
+| <img src="./images/results/Component%203%20-%20MockUp.png" class="component-image" alt="Component 3 MockUp" height="200"> | <img src="./images/results/Component%203%20-%20Before.png" class="component-image" alt="Component 3 Before" height="200"> | <img src="./images/results/Component%203%20-%20After.png" class="component-image" alt="Component 3 After" height="200"> |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
 
 Improvements: **+45% Structure Accuracy** Enhanced from 35% to 80% with clean component architecture for medium complexity components.
 
 ### Component 4: Hard complexity UI Skeleton
 
-| **Mockup**                                                                                                   | **Traditional AI Skeleton**                                                                                  | **XD Ecosystem (Plugin + MCP)**                                                                            |
-| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| <img src="./images/results/Component%204%20-%20MockUp.png" class="component-image" alt="Component 4 MockUp"> | <img src="./images/results/Component%204%20-%20Before.png" class="component-image" alt="Component 4 Before"> | <img src="./images/results/Component%204%20-%20After.png" class="component-image" alt="Component 4 After"> |
-| **Target Design**                                                                                            | **Traditional AI-Generated Skeleton**                                                                        | **XD Ecosystem (Plugin + MCP Server)**                                                                     |
+| **Mockup** | **Traditional AI Skeleton** | **XD Ecosystem (Plugin + MCP)** |
+| :----: | :----: | :----: |
+| <img src="./images/results/Component%204%20-%20MockUp.png" class="component-image" alt="Component 4 MockUp" height="200"> | <img src="./images/results/Component%204%20-%20Before.png" class="component-image" alt="Component 4 Before" height="200"> | <img src="./images/results/Component%204%20-%20After.png" class="component-image" alt="Component 4 After" height="200"> |
+| **Target Design** | **Traditional AI-Generated Skeleton** | **XD Ecosystem (Plugin + MCP Server)** |
 
 Improvements: **+40% Structure Accuracy** Enhanced from ~20% to ~60% with complex layout structure for hard complexity components.
 
@@ -115,3 +105,12 @@ Improvements: **+40% Structure Accuracy** Enhanced from ~20% to ~60% with comple
 **🎯 Result: The XD Ecosystem (Plugin + MCP Server) delivers +50% consistent accuracy improvement over traditional AI skeleton generation, achieving 60-90% structure accuracy across all complexity levels with enhanced design fidelity and seamless AI assistant integration.**
 
 _These results demonstrate the transformative impact of direct design tool integration with AI-powered skeleton generation workflows for modern development teams._
+
+<style>
+.component-image {
+    width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+</style>

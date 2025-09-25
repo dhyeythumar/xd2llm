@@ -7,11 +7,13 @@ A comprehensive ecosystem for bridging Adobe XD with AI assistants and Large Lan
 The XD Ecosystem consists of two core components that work together to enable AI-powered design workflows:
 
 ### 🔌 [XD Plugin](./xd-plugin/)
+
 Adobe XD plugin that extracts design specifications and communicates with external services.
 
 **[📖 Read Plugin Documentation →](./xd-plugin/README.md)**
 
 ### 🌐 [XD Server](./xd-server/)
+
 MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real-time WebSocket communication.
 
 **[📖 Read Server Documentation →](./xd-server/README.md)**
@@ -20,7 +22,9 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 
 ### **Flow Diagram**
 
-![Flow Diagram](./images/flow-diagram.png)
+<p align="center">
+    <img src="./images/flow-diagram.png" class="image" alt="Flow Diagram" height="400">
+</p>
 
 1. **AI Assistant** calls MCP tools (e.g., "get selected XD node")
 2. **MCP Server** processes request via EventEmitter pattern
@@ -30,7 +34,9 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 
 ### Sequence Diagram
 
-![Sequence Diagram](./images/sequence-diagram.png)
+<p align="center">
+    <img src="./images/sequence-diagram.png" class="image" alt="Sequence Diagram" height="400">
+</p>
 
 ## 🚀 Quick Start
 
@@ -48,9 +54,10 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
     ```
 
 3. Configure LLM Client
-Configure your MCP-compatible LLM client (Claude Desktop, Cursor, etc.) with:
-- **Endpoint**: `http://localhost:4000/mcp`
-- **Detailed setup**: See [XD Server Setup Guide](./xd-server/SETUP.md)
+   Configure your MCP-compatible LLM client (Claude Desktop, Cursor, etc.) with:
+
+-   **Endpoint**: `http://localhost:4000/mcp`
+-   **Detailed setup**: See [XD Server Setup Guide](./xd-server/SETUP.md)
 
 ## 📋 Prerequisites
 
@@ -60,17 +67,17 @@ Configure your MCP-compatible LLM client (Claude Desktop, Cursor, etc.) with:
 
 ## 💡 What You Can Do
 
-- **🤖 AI-Powered Design Analysis**: Get intelligent insights about your XD designs
-- **📝 Design System Documentation**: Automatically extract design tokens and specifications
-- **⚡ Code Generation**: Generate CSS/SCSS directly from XD designs
-- **🔄 Design-to-Code Workflows**: Seamlessly bridge design and development processes
+-   **🤖 AI-Powered Design Analysis**: Get intelligent insights about your XD designs
+-   **📝 Design System Documentation**: Automatically extract design tokens and specifications
+-   **⚡ Code Generation**: Generate CSS/SCSS directly from XD designs
+-   **🔄 Design-to-Code Workflows**: Seamlessly bridge design and development processes
 
 ## 🛠️ Development
 
 Each component has detailed development guides:
 
-- **XD Plugin**: [Development Guide](./xd-plugin/README.md#development)
-- **XD Server**: [Development Guide](./xd-server/README.md#development)
+-   **XD Plugin**: [Development Guide](./xd-plugin/README.md#development)
+-   **XD Server**: [Development Guide](./xd-server/README.md#development)
 
 ## 🤝 Contributing
 
@@ -83,3 +90,14 @@ Each component has detailed development guides:
 ## 📄 License
 
 MIT License - see [LICENSE](./LICENSE) file for details.
+
+<style>
+.image {
+    max-width: 100%;
+    width: auto;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 4px;
+    align: center;
+}
+</style>
