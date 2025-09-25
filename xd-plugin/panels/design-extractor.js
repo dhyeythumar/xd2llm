@@ -247,6 +247,8 @@ function create() {
     // Add event listeners
     designPanel.querySelector('#copy-btn').addEventListener('click', (event) => copyToClipboard(event, '#output'));
 
+    designPanel.querySelector('#retry-button').addEventListener('click', () => wsConnector.manualReconnect());
+
     // Set up connection status callback
     wsConnector.setConnectionStatusCallback(() => updateConnectionStatus());
 

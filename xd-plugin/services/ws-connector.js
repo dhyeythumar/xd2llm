@@ -269,21 +269,24 @@ class WSConnector {
      * Disconnect from WebSocket server
      */
     disconnect() {
-        // Reset retry attempts
-        this.#reconnectAttempts = 0;
+        try {
+            // Reset retry attempts
+            this.#isConnected = false;
+            this.#reconnectAttempts = 0;
+            this.#connectionId = null;
 
-        if (this.#reconnectTimer) {
-            clearTimeout(this.#reconnectTimer);
-            this.#reconnectTimer = null;
+            if (this.#reconnectTimer) {
+                clearTimeout(this.#reconnectTimer);
+                this.#reconnectTimer = null;
+            }
+
+            if (this.#ws && this.#ws.readyState === WebSocket.OPEN) {
+                this.#ws.close();
+                this.#ws = null;
+            }
+        } catch (error) {
+            console.error('Failed to disconnect from WebSocket server:', error);
         }
-
-        if (this.#ws) {
-            this.#ws.close();
-            this.#ws = null;
-        }
-
-        this.#isConnected = false;
-        this.#connectionId = null;
     }
 }
 
