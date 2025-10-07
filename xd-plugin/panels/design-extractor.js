@@ -344,7 +344,12 @@ function extractDesignInfo(node, depth = 0, parentBounds = null) {
     };
 
     // Recursively extract children for groups
-    if (info.nodeType === 'GROUP' && node.children && node.children.length > 0) {
+    if (
+        (info.nodeType === 'GROUP' || info.nodeType === 'SYMBOLINSTANCE') &&
+        info.semanticType !== 'ICON' && // avoid extracting children for icons
+        node.children &&
+        node.children.length > 0
+    ) {
         info.childCount = node.children.length;
         info.children = node.children.map((child) => extractDesignInfo(child, depth + 1, node.globalBounds));
     }
