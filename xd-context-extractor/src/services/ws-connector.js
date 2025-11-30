@@ -5,7 +5,7 @@
  * communication for real-time updates.
  */
 
-const PING_INTERVAL = 10000;
+const PING_INTERVAL = 30;
 const PORT = 4000;
 
 class WSConnector {
@@ -66,7 +66,7 @@ class WSConnector {
 
             if (this.#sendMessage(message)) console.info('Sent ping to WebSocket server');
             else console.warn('Failed to send ping to WebSocket server');
-        }, PING_INTERVAL);
+        }, PING_INTERVAL * 1000);
     }
 
     /**

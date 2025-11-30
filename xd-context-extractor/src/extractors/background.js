@@ -1,5 +1,4 @@
 const { Rectangle, Ellipse } = require('scenegraph');
-
 const { rgbToHex, rgbaToHex } = require('../utils/helper.js');
 const { STYLE_VARIABLES } = require('../utils/const.js');
 

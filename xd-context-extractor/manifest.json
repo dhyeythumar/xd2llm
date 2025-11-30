@@ -1,8 +1,8 @@
 {
     "id": "dhyeythumar-xd-context-extractor",
     "name": "Adobe XD Context Extractor",
+    "description": "Adobe XD plugin that extracts design context from XD mockups.",
     "version": "1.0.0",
-    "description": "Extract design context from XD mockups.",
     "languages": ["en"],
     "author": "Dhyey Thumar",
     "host": {

@@ -1,8 +1,8 @@
 {
-    "name": "@dhyeythumar/xd-ecosystem",
+    "name": "@dhyeythumar/xd2llm",
     "version": "1.0.0",
-    "displayName": "XD Ecosystem",
-    "description": "Ecosystem that bridges Adobe XD plugin with LLMs for design spec extraction, so LLMs can generate UI code more accurately based on the design specs.",
+    "displayName": "XD 2 LLM",
+    "description": "Bridges Adobe XD with LLMs to provide design context, so LLMs can generate UI code more accurately based on the actual design tokens.",
     "license": "MIT",
     "author": {
         "name": "Dhyey Thumar",
@@ -10,20 +10,21 @@
         "url": "https://github.com/dhyeythumar"
     },
     "keywords": [
+        "design-context-extractor",
+        "llm-connector",
         "mcp-server",
-        "llm",
-        "design-specs-extractor",
-        "bridge",
         "websocket",
-        "adobe-xd-plugin"
+        "adobe-xd-plugin",
+        "mcp-tools"
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/dhyeythumar/xd-ecosystem.git"
+        "url": "https://github.com/dhyeythumar/xd2llm.git"
     },
-    "homepage": "https://github.com/dhyeythumar/xd-ecosystem",
+    "homepage": "https://github.com/dhyeythumar/xd2llm",
     "scripts": {
-        "setup": "cd xd-server && npm run setup && cd .. && cd xd-plugin && npm run setup"
+        "install": "cd xd-context-extractor && npm ci && cd .. && cd xd-llm-connector && npm ci",
+        "setup": "cd xd-context-extractor && npm run setup && cd .. && cd xd-llm-connector && npm run setup"
     },
     "packageManager": "npm@11.4.2",
     "engines": {

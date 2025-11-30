@@ -4,9 +4,9 @@ const storage = require('uxp').storage;
 const clipboard = require('clipboard');
 
 class UIHelper {
-    static toggleSpecContent(panel, show) {
-        panel.querySelector('#spec-content').className = show ? 'show' : 'hide';
-        panel.querySelector('#spec-warning').className = show ? 'warning hide' : 'warning show';
+    static toggleContent(panel, show) {
+        panel.querySelector('#content').className = show ? 'show' : 'hide';
+        panel.querySelector('#warning').className = show ? 'warning hide' : 'warning show';
     }
 }
 

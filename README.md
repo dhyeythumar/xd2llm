@@ -1,22 +1,22 @@
-# XD Ecosystem
+# XD 2 LLM
 
 A comprehensive ecosystem for bridging Adobe XD with AI assistants and Large Language Models (LLMs), enabling real-time design data extraction and AI-powered design workflows.
 
 ## 🏗️ Architecture Overview
 
-The XD Ecosystem consists of two core components that work together to enable AI-powered design workflows:
+XD 2 LLM consists of two core components that work together to enable AI-powered design workflows:
 
-### 🔌 [XD Plugin](./xd-plugin/)
+### 🔌 [XD Context Extractor](./xd-context-extractor/)
 
 Adobe XD plugin that extracts design specifications and communicates with external services.
 
-**[📖 Read Plugin Documentation →](./xd-plugin/README.md)**
+**[📖 Read Plugin Documentation →](./xd-context-extractor/README.md)**
 
-### 🌐 [XD Server](./xd-server/)
+### 🌐 [XD LLM Connector](./xd-llm-connector/)
 
 MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real-time WebSocket communication.
 
-**[📖 Read Server Documentation →](./xd-server/README.md)**
+**[📖 Read Server Documentation →](./xd-llm-connector/README.md)**
 
 ## 🔄 How It Works
 
@@ -40,24 +40,24 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 
 ## 🚀 Quick Start
 
-1. **XD Plugin & XD Server Setup**:
+1. **XD Context Extractor & XD LLM Connector Setup**:
 
     ```bash
-    # This command will setup XD Plugin as well as XD Server
+    # This command will setup XD Context Extractor as well as XD LLM Connector
     npm run setup
     ```
 
 2. **Start MCP Server**:
 
     ```bash
-    xd-server
+    xd-llm-connector
     ```
 
 3. Configure LLM Client
    Configure your MCP-compatible LLM client (Claude Desktop, Cursor, etc.) with:
 
 -   **Endpoint**: `http://localhost:4000/mcp`
--   **Detailed setup**: See [XD Server Setup Guide](./xd-server/SETUP.md)
+-   **Detailed setup**: See [XD LLM Connector Setup Guide](./xd-llm-connector/SETUP.md)
 
 ## 📋 Prerequisites
 
@@ -74,11 +74,11 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 
 ## 📊 Performance Results
 
-The XD Ecosystem delivers exceptional improvements over traditional AI-generated skeletons:
+XD 2 LLM delivers exceptional improvements over traditional AI-generated skeletons:
 
-- **+50% Average Accuracy Improvement** across all complexity levels
-- **60-90% Structure Accuracy** achieved with the XD Ecosystem
-- **Consistent Performance** from easy to hard complexity components
+-   **+50% Average Accuracy Improvement** across all complexity levels
+-   **60-90% Structure Accuracy** achieved with XD 2 LLM
+-   **Consistent Performance** from easy to hard complexity components
 
 **[📈 View Detailed Results & Comparisons →](./RESULTS.md)**
 
@@ -86,15 +86,15 @@ The XD Ecosystem delivers exceptional improvements over traditional AI-generated
 
 Each component has detailed development guides:
 
--   **XD Plugin**: [Development Guide](./xd-plugin/README.md#development)
--   **XD Server**: [Development Guide](./xd-server/README.md#development)
+-   **XD Context Extractor**: [Development Guide](./xd-context-extractor/README.md#development)
+-   **XD LLM Connector**: [Development Guide](./xd-llm-connector/README.md#development)
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test with both XD Plugin and XD Server
+4. Test with both XD Context Extractor and XD LLM Connector
 5. Submit a pull request
 
 ## 📄 License

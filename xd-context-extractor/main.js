@@ -1,17 +1,25 @@
-const { show: showDesign, hide: hideDesign, update: updateDesign } = require('./panels/design-extractor.js');
-const { show: showSCSS, hide: hideSCSS, update: updateSCSS } = require('./panels/scss.js');
+const {
+    show: showJSONPanel,
+    hide: hideJSONPanel,
+    update: updateJSONPanel,
+} = require('./src/ui-panels/json-panel/json-panel.js');
+const {
+    show: showSCSSPanel,
+    hide: hideSCSSPanel,
+    update: updateSCSSPanel,
+} = require('./src/ui-panels/scss-panel/scss-panel.js');
 
 module.exports = {
     panels: {
         jsonDesignContextExtractor: {
-            show: showDesign,
-            hide: hideDesign,
-            update: updateDesign,
+            show: showJSONPanel,
+            hide: hideJSONPanel,
+            update: updateJSONPanel,
         },
         scssDesignContextExtractor: {
-            show: showSCSS,
-            hide: hideSCSS,
-            update: updateSCSS,
+            show: showSCSSPanel,
+            hide: hideSCSSPanel,
+            update: updateSCSSPanel,
         },
     },
     commands: {},
