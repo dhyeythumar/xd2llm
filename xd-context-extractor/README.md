@@ -1,6 +1,6 @@
-# Adobe XD Specifications Extractor Plugin
+# Adobe XD Context Extractor Plugin
 
-Adobe XD plugin that extracts design specifications and communicates with AI assistants and Large Language Models (LLMs) for intelligent design-to-code workflows.
+Adobe XD plugin that extracts design specifications from XD mockups.
 
 ## 🚀 Key Features
 

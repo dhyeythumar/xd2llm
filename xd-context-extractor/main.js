@@ -3,12 +3,12 @@ const { show: showSCSS, hide: hideSCSS, update: updateSCSS } = require('./panels
 
 module.exports = {
     panels: {
-        designInfoExtractor: {
+        jsonDesignContextExtractor: {
             show: showDesign,
             hide: hideDesign,
             update: updateDesign,
         },
-        scssDesignSpecExtractor: {
+        scssDesignContextExtractor: {
             show: showSCSS,
             hide: hideSCSS,
             update: updateSCSS,

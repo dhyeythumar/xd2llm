@@ -1,8 +1,8 @@
 {
-    "id": "xdplugin-dhyeythumar",
-    "name": "Adobe XD Spec Extractor",
+    "id": "dhyeythumar-xd-context-extractor",
+    "name": "Adobe XD Context Extractor",
     "version": "1.0.0",
-    "description": "Extract design specs from XD in SCSS or JSON.",
+    "description": "Extract design context from XD mockups.",
     "languages": ["en"],
     "author": "Dhyey Thumar",
     "host": {
@@ -24,14 +24,14 @@
     "uiEntryPoints": [
         {
             "type": "panel",
-            "label": "Design Info Extractor (for LLMs)",
-            "panelId": "designInfoExtractor",
+            "label": "Design Context Extractor in JSON (for LLMs)",
+            "panelId": "jsonDesignContextExtractor",
             "shortcut": { "mac": "Ctrl+Shift+D" }
         },
         {
             "type": "panel",
-            "label": "Design Specs in SCSS",
-            "panelId": "scssDesignSpecExtractor",
+            "label": "Design Context Extractor in SCSS",
+            "panelId": "scssDesignContextExtractor",
             "shortcut": { "mac": "Ctrl+Shift+S" }
         }
     ]

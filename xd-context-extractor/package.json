@@ -1,8 +1,8 @@
 {
-    "name": "@dhyeythumar/xd-plugin",
+    "name": "@dhyeythumar/xd-context-extractor",
     "version": "1.0.0",
-    "displayName": "Customized XD Plugin",
-    "description": "Adobe XD plugin that extracts design specifications and communicates with AI assistants and Large Language Models (LLMs) for intelligent design-to-code workflows.",
+    "displayName": "Adobe XD Context Extractor",
+    "description": "Adobe XD plugin that extracts design context from XD mockups.",
     "license": "MIT",
     "author": {
         "name": "Dhyey Thumar",
