@@ -16,7 +16,7 @@ const styles = require('./styles.js');
 const html = require('./html.js');
 const extractTextProperties = require('../../extractors/text.js');
 const extractBackgroundProperties = require('../../extractors/background.js');
-const { UIHelper, copyToClipboard } = require('../../utils/helper.js');
+const { UIHelper, copyToClipboard, loadStyleVariables } = require('../../utils/helper.js');
 const { ACCEPTABLE_CSS_VALUES } = require('../../utils/const.js');
 
 let scssPanel;
@@ -118,12 +118,17 @@ function generateBackgroundSCSS(properties) {
 // Panel Functions
 // -------------------------------------------------------------
 
-function show(event) {
-    if (!scssPanel) event.node.appendChild(create());
+async function show(event) {
+    if (!scssPanel) {
+        event.node.appendChild(create());
+        await loadStyleVariables();
+    }
 }
 
 // Clean up or hide panel-specific content
 function hide() {
+    if (!scssPanel) return;
+
     scssPanel.remove();
     scssPanel = null;
 }
@@ -136,8 +141,6 @@ function update() {
         UIHelper.toggleContent(scssPanel, false);
         return;
     }
-
-    console.log(selectedItem.constructor.name);
 
     // Handle different types of XD Nodes / Elements
     switch (selectedItem.constructor.name) {

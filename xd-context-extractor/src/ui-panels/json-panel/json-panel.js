@@ -19,7 +19,7 @@ const html = require('./html.js');
 const WSConnector = require('../../services/ws-connector.js');
 const extractTextProperties = require('../../extractors/text.js');
 const extractBackgroundProperties = require('../../extractors/background.js');
-const { UIHelper, copyToClipboard, exportNodeAsBase64 } = require('../../utils/helper.js');
+const { UIHelper, copyToClipboard, exportNodeAsBase64, loadStyleVariables } = require('../../utils/helper.js');
 
 // Initialize WebSocket connector
 const wsConnector = new WSConnector();
@@ -102,7 +102,7 @@ async function sendDesignContext(designContext, selectedNode) {
 }
 
 // -------------------------------------------------------------
-// Context Info Extraction Functions
+// Design Context Extraction Functions
 // -------------------------------------------------------------
 
 /**
@@ -288,14 +288,18 @@ function displayDesignContext(designContext) {
 // Panel Functions
 // -------------------------------------------------------------
 
-function show(event) {
+async function show(event) {
     wsConnector.handleSelectionChange(null);
 
-    if (!jsonPanel) event.node.appendChild(create());
+    if (!jsonPanel) {
+        event.node.appendChild(create());
+        await loadStyleVariables();
+    }
 }
 
 function hide() {
     wsConnector.handleSelectionChange(null);
+    if (!jsonPanel) return;
 
     jsonPanel.remove();
     jsonPanel = null;
@@ -303,7 +307,6 @@ function hide() {
 
 function update() {
     wsConnector.handleSelectionChange(null);
-
     if (!jsonPanel) return;
 
     const selectedNode = selection?.items?.[0];

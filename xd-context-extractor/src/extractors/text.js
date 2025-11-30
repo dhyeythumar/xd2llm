@@ -1,5 +1,4 @@
 const { rgbToHex } = require('../utils/helper.js');
-const { STYLE_VARIABLES } = require('../utils/const.js');
 
 /**
  * Format of Typography properties in SCSS:
@@ -20,20 +19,20 @@ function extractTextProperties(textNode, displayFunction) {
     // -------------------------------------------------------------
     // Font Family
     // -------------------------------------------------------------
-    const fontFamily = textNode.fontFamily.toLowerCase();
-    properties.fontFamily = STYLE_VARIABLES.fontFamily[fontFamily];
+    const fontFamily = textNode.fontFamily;
+    properties.fontFamily = STYLE_VARIABLES?.fontFamily?.[fontFamily.toLowerCase()] || fontFamily;
 
     // -------------------------------------------------------------
     // Font Weight (aka fontStyle in XD)
     // -------------------------------------------------------------
-    const fontStyle = (textNode.fontStyle || 'Regular').toLowerCase();
-    properties.fontWeight = STYLE_VARIABLES.fontWeight[fontStyle];
+    const fontStyle = textNode.fontStyle || 'Regular';
+    properties.fontWeight = STYLE_VARIABLES?.fontWeight?.[fontStyle.toLowerCase()] || fontStyle;
 
     // -------------------------------------------------------------
     // Font Size
     // -------------------------------------------------------------
     const fontSize = textNode.fontSize ?? 14;
-    properties.fontSize = STYLE_VARIABLES.fontSize[fontSize] || `${fontSize}px`;
+    properties.fontSize = STYLE_VARIABLES?.fontSize?.[fontSize] || `${fontSize}px`;
 
     // -------------------------------------------------------------
     // Color
@@ -42,7 +41,7 @@ function extractTextProperties(textNode, displayFunction) {
     if (textNode.fill && textNode.fill.constructor.name === 'Color') {
         colorValue = rgbToHex(textNode.fill).toLowerCase();
     }
-    properties.color = STYLE_VARIABLES.fontColor[colorValue] || STYLE_VARIABLES.color[colorValue] || colorValue;
+    properties.color = STYLE_VARIABLES?.fontColor?.[colorValue] || STYLE_VARIABLES?.color?.[colorValue] || colorValue;
 
     // -------------------------------------------------------------
     // Line Height

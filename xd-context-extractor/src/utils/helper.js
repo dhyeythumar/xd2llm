@@ -1,7 +1,9 @@
 const application = require('application');
-const fs = require('uxp').storage.localFileSystem;
 const storage = require('uxp').storage;
+const fs = require('uxp').storage.localFileSystem;
 const clipboard = require('clipboard');
+const settingsStorage = require('./settings-storage.js');
+const { SETTING_KEYS } = require('./const.js');
 
 class UIHelper {
     static toggleContent(panel, show) {
@@ -106,6 +108,36 @@ async function exportNodeAsBase64(node) {
     }
 }
 
+/**
+ * Validate JSON string
+ * @param {string} jsonString - The JSON string to validate
+ * @returns {Object} - The validation result
+ */
+function validateJSONString(jsonString) {
+    try {
+        if (!jsonString || jsonString.trim() === '') {
+            return { valid: true, data: {} };
+        }
+
+        const parsed = JSON.parse(jsonString);
+        if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+            return { valid: false, error: 'Invalid JSON format. Must be a JSON object.' };
+        }
+        return { valid: true, data: parsed };
+    } catch (error) {
+        return { valid: false, error: `Invalid JSON: ${error.message}` };
+    }
+}
+
+/**
+ * Load style variables from storage
+ * @returns {Promise<Object>} - The style variables object
+ */
+async function loadStyleVariables() {
+    const styleVariables = await settingsStorage.loadSettings(SETTING_KEYS.STYLE_VARIABLES);
+    globalThis.STYLE_VARIABLES = styleVariables ? JSON.parse(styleVariables) : {};
+}
+
 module.exports = {
     UIHelper,
     rgbToHex,
@@ -113,4 +145,6 @@ module.exports = {
     copyToClipboard,
     arrayBufferToBase64,
     exportNodeAsBase64,
+    validateJSONString,
+    loadStyleVariables,
 };

@@ -1,6 +1,5 @@
 const { Rectangle, Ellipse } = require('scenegraph');
 const { rgbToHex, rgbaToHex } = require('../utils/helper.js');
-const { STYLE_VARIABLES } = require('../utils/const.js');
 
 /**
  * Format of Background properties in SCSS:
@@ -33,7 +32,7 @@ function extractBackgroundProperties(shapeNode, displayFunction) {
     ) {
         const strokeColor = rgbToHex(shapeNode.stroke).toLowerCase();
         const strokeWidth = shapeNode.strokeWidth || 1;
-        const strokeColorVar = STYLE_VARIABLES.color[strokeColor] || strokeColor;
+        const strokeColorVar = STYLE_VARIABLES?.color?.[strokeColor] || strokeColor;
         properties.border = `${strokeWidth}px solid ${strokeColorVar}`;
     }
 
@@ -50,14 +49,14 @@ function extractBackgroundProperties(shapeNode, displayFunction) {
         ) {
             if (radii.topLeft > 0) {
                 const radius = `${radii.topLeft}px`;
-                properties.borderRadius = STYLE_VARIABLES.borderRadius[radius] || radius;
+                properties.borderRadius = STYLE_VARIABLES?.borderRadius?.[radius] || radius;
             }
         } else {
             // Different corner radii
             properties.borderRadius = `${radii.topLeft}px ${radii.topRight}px ${radii.bottomRight}px ${radii.bottomLeft}px`;
         }
     } else if (shapeNode instanceof Ellipse) {
-        properties.borderRadius = STYLE_VARIABLES.borderRadius['50%'];
+        properties.borderRadius = STYLE_VARIABLES?.borderRadius?.['50%'] || '50%';
     }
 
     // -------------------------------------------------------------
@@ -65,7 +64,8 @@ function extractBackgroundProperties(shapeNode, displayFunction) {
     // -------------------------------------------------------------
     if (shapeNode.fill && shapeNode.fill.constructor.name === 'Color') {
         const bgColor = rgbToHex(shapeNode.fill).toLowerCase();
-        properties.backgroundColor = STYLE_VARIABLES.bgColor[bgColor] || STYLE_VARIABLES.color[bgColor] || bgColor;
+        properties.backgroundColor =
+            STYLE_VARIABLES?.bgColor?.[bgColor] || STYLE_VARIABLES?.color?.[bgColor] || bgColor;
     }
 
     // -------------------------------------------------------------
