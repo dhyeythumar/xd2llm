@@ -162,7 +162,7 @@ class WSConnector {
      */
     #scheduleReconnect() {
         if (this.#reconnectAttempts >= this.#maxReconnectAttempts) {
-            console.error('Max reconnection attempts reached. Giving up.');
+            console.warn('Max reconnection attempts reached. Giving up.');
             return;
         }
 

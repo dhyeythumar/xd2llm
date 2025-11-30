@@ -20,7 +20,9 @@ module.exports = `<div class="container">
     </div>
 
     <div id="warning" class="warning show">
-        Please select an <strong>element</strong> in your Adobe XD document to generate SCSS styles.<br>
-        <small>Supports: Text (typography), Rectangle, Ellipse (background & dimensions)</small>
+        Please select an <strong>element</strong> in your Adobe XD document to generate SCSS styles.<br />
+        <div>
+            Supports the following elements: <br />For typography: Text primitive node.<br />For background & dimensions: Rectangle, Line, Path, Ellipse primitive nodes.
+        </div>
     </div>
 </div>`;

@@ -92,11 +92,11 @@ function updateConnectionStatus() {
     }
 }
 
-async function sendSelectedNode(context, selectedNode) {
+async function sendDesignContext(designContext, selectedNode) {
     const base64Image = await exportNodeAsBase64(selectedNode);
 
     wsConnector.handleSelectionChange({
-        json: context,
+        json: designContext,
         image: base64Image,
     });
 }
@@ -109,8 +109,8 @@ async function sendSelectedNode(context, selectedNode) {
  * Extract comprehensive context information from XD Node
  * Recursively traverses groups and builds nested component structure
  */
-function extractContextInfo(node, depth = 0, parentBounds = null) {
-    const info = {
+function extractDesignContext(node, depth = 0, parentBounds = null) {
+    const context = {
         // Basic node information
         id: node.guid,
         nodeName: node.name || 'Unnamed Node',
@@ -130,15 +130,17 @@ function extractContextInfo(node, depth = 0, parentBounds = null) {
 
     // Recursively extract children for groups
     if (
-        (info.nodeType === 'GROUP' || info.nodeType === 'SYMBOLINSTANCE') &&
-        info.semanticType !== 'ICON' && // avoid extracting children for icons
+        (context.nodeType === 'GROUP' ||
+            context.nodeType === 'SYMBOLINSTANCE' ||
+            context.nodeType === 'SCROLLABLEGROUP') &&
+        context.semanticType !== 'ICON' && // avoid extracting children for icons
         node.children &&
         node.children.length > 0
     ) {
-        info.childCount = node.children.length;
-        info.children = node.children.map((child) => extractContextInfo(child, depth + 1, node.globalBounds));
+        context.childCount = node.children.length;
+        context.children = node.children.map((child) => extractDesignContext(child, depth + 1, node.globalBounds));
     }
-    return info;
+    return context;
 }
 
 /**
@@ -195,11 +197,12 @@ function extractVisualProperties(node, parentBounds = null) {
 
     switch (node.constructor.name) {
         case 'Text':
-            // Typography (for text elements)
             styles.typography = extractTextProperties(node);
             break;
         case 'Rectangle':
         case 'Ellipse':
+        case 'Path':
+        case 'Line':
             styles.background = extractBackgroundProperties(node);
             break;
         default:
@@ -217,28 +220,28 @@ function extractVisualProperties(node, parentBounds = null) {
 /**
  * Generate component tree visualization
  */
-function generateComponentTree(context, prefix = '', isLast = true, isRoot = true) {
+function generateComponentTree(designContext, prefix = '', isLast = true, isRoot = true) {
     let tree = '';
 
     // Format element info with text content preview
-    const dimensions = `(${context.visualProperties.bounds.width} x ${context.visualProperties.bounds.height})`;
+    const dimensions = `(${designContext.visualProperties.bounds.width} x ${designContext.visualProperties.bounds.height})`;
 
-    let textPreview = context.textContent?.replace(/\n/g, '');
+    let textPreview = designContext.textContent?.replace(/\n/g, '');
     textPreview = textPreview ? ` "${textPreview.substring(0, 12)}${textPreview.length > 12 ? '...' : ''}"` : '';
 
     // Root element doesn't need tree symbols
     if (isRoot) {
-        tree += `${context.semanticType} ${dimensions}${textPreview}\n`;
+        tree += `${designContext.semanticType} ${dimensions}${textPreview}\n`;
     } else {
         // Use proper tree symbols for nested elements
         const connector = isLast ? '└── ' : '├── ';
-        tree += `${prefix}${connector}${context.semanticType} ${dimensions}${textPreview}\n`;
+        tree += `${prefix}${connector}${designContext.semanticType} ${dimensions}${textPreview}\n`;
     }
 
     // Process children with proper indentation
-    if (context.children && context.children.length > 0) {
-        context.children.forEach((child, index) => {
-            const isLastChild = index === context.children.length - 1;
+    if (designContext.children && designContext.children.length > 0) {
+        designContext.children.forEach((child, index) => {
+            const isLastChild = index === designContext.children.length - 1;
 
             // Calculate new prefix for children
             let newPrefix;
@@ -259,10 +262,10 @@ function generateComponentTree(context, prefix = '', isLast = true, isRoot = tru
 /**
  * Count total elements in design tree
  */
-function countElements(context) {
+function countElements(designContext) {
     let count = 1; // Current element
-    if (context.children) {
-        count += context.children.reduce((sum, child) => sum + countElements(child), 0);
+    if (designContext.children) {
+        count += designContext.children.reduce((sum, child) => sum + countElements(child), 0);
     }
     return count;
 }
@@ -270,15 +273,15 @@ function countElements(context) {
 /**
  * Display design context information
  */
-function displayContextInfo(context) {
+function displayDesignContext(designContext) {
     // Update element count
-    jsonPanel.querySelector('#element-count').textContent = `${countElements(context)} elements`;
+    jsonPanel.querySelector('#element-count').textContent = `${countElements(designContext)} elements`;
 
     // Display component tree
-    jsonPanel.querySelector('#tree').textContent = generateComponentTree(context, '', true, true);
+    jsonPanel.querySelector('#tree').textContent = generateComponentTree(designContext, '', true, true);
 
     // Display JSON
-    jsonPanel.querySelector('#output').textContent = JSON.stringify(context, null, 4);
+    jsonPanel.querySelector('#output').textContent = JSON.stringify(designContext, null, 2);
 }
 
 // -------------------------------------------------------------
@@ -310,11 +313,11 @@ function update() {
     }
 
     // Extract context information recursively
-    const context = extractContextInfo(selectedNode);
-    displayContextInfo(context);
+    const designContext = extractDesignContext(selectedNode);
+    displayDesignContext(designContext);
 
     // Send selected node to server
-    sendSelectedNode(context, selectedNode);
+    sendDesignContext(designContext, selectedNode);
 
     UIHelper.toggleContent(jsonPanel, true);
 }

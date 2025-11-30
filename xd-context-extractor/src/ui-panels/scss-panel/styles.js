@@ -134,7 +134,10 @@ module.exports = `<style>
         margin: 16px 0;
         font-size: 12px;
         color: #856404;
-        text-align: center;
+        text-align: left;
+    }
+    .warning div {
+        margin-top: 16px; 
     }
     .show { display: block; }
     .hide { display: none; }

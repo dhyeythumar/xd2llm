@@ -146,7 +146,9 @@ function update() {
             break;
         }
         case 'Rectangle':
-        case 'Ellipse': {
+        case 'Ellipse':
+        case 'Path':
+        case 'Line': {
             generateBackgroundSCSS(extractBackgroundProperties(selectedItem, displayProperties));
             break;
         }

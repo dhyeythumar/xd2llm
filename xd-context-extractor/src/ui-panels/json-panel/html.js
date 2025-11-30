@@ -31,7 +31,9 @@ module.exports = `<div class="container">
     </div>
     
     <div id="warning" class="warning show">
-        Please select an <strong>element or group</strong> in your Adobe XD document to extract design information.<br>
-        <small>Supports: Groups (recursive), Text, Shapes, Images - Perfect for React component generation!</small>
+        Please select an <strong>element or group</strong> in your Adobe XD document to extract design information.<br />
+        <div>
+            Supports the following elements: <br />For typography: Text primitive node.<br />For background & dimensions: Rectangle, Line, Path, Ellipse primitive nodes.
+        </div>
     </div>
 </div>`;
