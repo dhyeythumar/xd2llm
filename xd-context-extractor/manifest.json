@@ -33,6 +33,12 @@
             "label": "Design Context Extractor in SCSS",
             "panelId": "scssDesignContextExtractor",
             "shortcut": { "mac": "Ctrl+Shift+S" }
+        },
+        {
+            "type": "panel",
+            "label": "Settings",
+            "panelId": "settings",
+            "shortcut": { "mac": "Ctrl+Shift+Z" }
         }
     ]
 }

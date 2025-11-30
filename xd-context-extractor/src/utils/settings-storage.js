@@ -33,7 +33,7 @@ class SettingsStorage {
             const dataFolder = await fs.getDataFolder();
             const file = await dataFolder.getEntry(this.#FILE);
             const contents = await file.read();
-            const settings = JSON.parse(contents);
+            const settings = JSON.parse(contents || '{}');
             return settingKey !== undefined ? settings[settingKey] : settings;
         } catch (error) {
             // File doesn't exist or error reading - return defaults

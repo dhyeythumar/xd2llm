@@ -42,22 +42,39 @@ module.exports = `<style>
         display: block;
         font-size: 12px;
         color: #666;
-        margin-bottom: 8px;
         font-weight: 500;
+        margin-bottom: 8px;
+    }
+    .example-code {
+        font-family: 'Monaco', 'Menlo', 'Fira Code', monospace;
+        font-size: 11px;
+        line-height: 1.6;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 12px;
+        margin: 8px 0 12px 0;
+        color: #333;
+        white-space: pre;
+        overflow-x: auto;
+        display: block;
     }
     .json-input {
         width: 100%;
         min-height: 200px;
-        padding: 12px;
+        max-height: 400px;
+        margin: 0;
         font-family: 'Monaco', 'Menlo', 'Fira Code', monospace;
         font-size: 11px;
         line-height: 1.6;
         border: 1px solid #ddd;
         border-radius: 4px;
-        resize: vertical;
-        box-sizing: border-box;
         background: #f8f9fa;
         color: #333;
+        overflow-x: auto;
+        overflow-y: auto;
+        resize: vertical;
+        box-sizing: border-box;
     }
     .json-input:focus {
         outline: none;
@@ -66,7 +83,7 @@ module.exports = `<style>
         box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.1);
     }
     .error-message {
-        margin-top: 8px;
+        margin: 0 12px 12px 12px;
         padding: 8px 12px;
         background: #f8d7da;
         border: 1px solid #f5c6cb;
@@ -74,12 +91,6 @@ module.exports = `<style>
         color: #721c24;
         font-size: 11px;
         font-family: 'Monaco', 'Menlo', monospace;
-    }
-    .error-message.show {
-        display: block;
-    }
-    .error-message.hide {
-        display: none;
     }
     .save-button {
         flex: 1;

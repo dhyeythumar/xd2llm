@@ -17,14 +17,19 @@ function create() {
     settingsPanel = document.createElement('div');
     settingsPanel.innerHTML = `${styles}${html}`;
 
-    // register input validation listeners for each setting
-    SETTINGS_MAPPING.forEach((setting) => {
+    SETTINGS_MAPPING.forEach(async (setting) => {
         const parentElement = settingsPanel.querySelector(`#${setting.sectionId}`);
         const input = parentElement.querySelector('.user-input');
         const saveButton = parentElement.querySelector('.save-button');
-        saveButton.addEventListener('click', () => saveSetting(parentElement, setting.settingKey));
+        saveButton.addEventListener('click', () => saveSetting(input, setting));
 
+        // load settings
+        const value = await settingsStorage.loadSettings(setting.settingKey);
+
+        // register input validation listeners for each setting
         if (setting.inputType === 'JSON_STRING') {
+            input.value = JSON.stringify(JSON.parse(value || '{}'), null, 4);
+
             let validationTimeout;
             input.addEventListener('input', () => {
                 clearTimeout(validationTimeout);
@@ -44,11 +49,10 @@ function create() {
                     }
                 }, 500);
             });
+        } else {
+            input.value = value || '';
         }
     });
-
-    // Load existing settings
-    loadSettings();
 
     return settingsPanel;
 }
@@ -84,10 +88,11 @@ function hideError(parentElement) {
 }
 
 // Save setting to storage
-async function saveSetting(parentElement, settingKey) {
+async function saveSetting(inputElement, setting) {
     try {
-        const input = parentElement.querySelector('.user-input').value.trim();
-        const success = await settingsStorage.saveSettings(settingKey, input);
+        const content = inputElement.value.trim();
+        const input = setting.inputType === 'JSON_STRING' ? JSON.parse(content || '{}') : content;
+        const success = await settingsStorage.saveSettings(setting.settingKey, JSON.stringify(input));
 
         if (success) {
             showStatus('Settings saved successfully!', 'success');
@@ -97,27 +102,6 @@ async function saveSetting(parentElement, settingKey) {
     } catch (error) {
         console.error('Failed to save settings:', error);
         showStatus('An error occurred while saving settings.', 'error');
-    }
-}
-
-// Load saved settings and populate the form
-async function loadSettings() {
-    try {
-        SETTINGS_MAPPING.forEach(async (setting) => {
-            const parentElement = settingsPanel.querySelector(`#${setting.sectionId}`);
-            const input = parentElement.querySelector('.user-input');
-            const value = await settingsStorage.loadSettings(setting.settingKey);
-
-            if (value) {
-                if (setting.inputType === 'JSON_STRING') {
-                    input.value = JSON.stringify(value, null, 2);
-                } else {
-                    input.value = value;
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Failed to load settings:', error);
     }
 }
 
@@ -150,13 +134,7 @@ function hide() {
     settingsPanel = null;
 }
 
-function update() {
-    if (!settingsPanel) return;
-
-    // Settings panel doesn't need to update based on selection
-    // But we can reload settings if panel is already shown
-    loadSettings();
-}
+function update() {}
 
 module.exports = {
     show,
