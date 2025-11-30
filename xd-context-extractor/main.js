@@ -8,6 +8,11 @@ const {
     hide: hideSCSSPanel,
     update: updateSCSSPanel,
 } = require('./src/ui-panels/scss-panel/scss-panel.js');
+const {
+    show: showSettingsPanel,
+    hide: hideSettingsPanel,
+    update: updateSettingsPanel,
+} = require('./src/ui-panels/settings-panel/settings-panel.js');
 
 module.exports = {
     panels: {
@@ -20,6 +25,11 @@ module.exports = {
             show: showSCSSPanel,
             hide: hideSCSSPanel,
             update: updateSCSSPanel,
+        },
+        settings: {
+            show: showSettingsPanel,
+            hide: hideSettingsPanel,
+            update: updateSettingsPanel,
         },
     },
     commands: {},
