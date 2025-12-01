@@ -1,8 +1,8 @@
 {
-    "name": "@dhyeythumar/xd-server",
-    "version": "1.0.0",
-    "displayName": "Customized XD Server",
-    "description": "Server that bridges Adobe XD plugin with LLMs for design spec extraction, so LLMs can generate UI code more accurately based on the design specs.",
+    "name": "@dhyeythumar/xd-llm-connector",
+    "version": "2.0.0",
+    "displayName": "Adobe XD LLM Connector",
+    "description": "Server that provides bridge between Adobe XD plugin and LLMs, so LLMs can query design context and generate UI code more accurately.",
     "license": "MIT",
     "author": {
         "name": "Dhyey Thumar",
@@ -12,7 +12,8 @@
     "type": "module",
     "main": "src/server.js",
     "bin": {
-        "xd-server": "src/server.js"
+        "xd-server": "src/server.js",
+        "xd-llm-connector": "src/server.js"
     },
     "files": [
         "src/",
@@ -22,10 +23,10 @@
     ],
     "scripts": {
         "setup": "npm ci && npm link",
-        "start": "node src/server.js",
-        "dev": "node --watch src/server.js",
-        "inspector": "npx @modelcontextprotocol/inspector",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "node --loader ts-node/esm src/server.ts",
+        "dev": "node --loader ts-node/esm --watch src/server.ts",
+        "build": "tsc",
+        "inspector": "npx @modelcontextprotocol/inspector"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.18.1",
@@ -36,7 +37,13 @@
     },
     "devDependencies": {
         "@modelcontextprotocol/inspector": "^0.16.8",
-        "@types/node": "^22.0.0"
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.5",
+        "@types/node": "^22.19.1",
+        "@types/uuid": "^10.0.0",
+        "@types/ws": "^8.18.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
     },
     "packageManager": "npm@11.4.2",
     "engines": {

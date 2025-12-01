@@ -1,2 +1,3 @@
 *.xdx
 node_modules/
+dist/

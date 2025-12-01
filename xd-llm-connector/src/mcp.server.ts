@@ -8,9 +8,28 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import logger from './logger.js';
+import WSServer from './ws.server.js';
+import { Request, Response } from 'express';
+
+interface MCPResponse {
+    content: Array<{
+        type: string;
+        text?: string;
+        data?: string;
+        mimeType?: string;
+        [key: string]: any;
+    }>;
+    isError?: boolean;
+}
 
 export default class MCPServer {
-    #returnMcpErrorResponse(message) {
+    private wsServer: WSServer;
+
+    constructor(wsServer: WSServer) {
+        this.wsServer = wsServer;
+    }
+
+    #returnMcpErrorResponse(message: any): MCPResponse {
         return {
             content: [
                 {
@@ -22,9 +41,9 @@ export default class MCPServer {
         };
     }
 
-    #returnMcpSuccessResponse(message, extraDetails = {}) {
+    #returnMcpSuccessResponse(message: any, extraDetails: any = {}): MCPResponse {
         // Initialize response with message
-        const response = {
+        const response: MCPResponse = {
             content: [
                 {
                     type: 'text',
@@ -41,7 +60,7 @@ export default class MCPServer {
         return response;
     }
 
-    #getServer() {
+    #getServer(): McpServer {
         // Initialize stateless MCP server
         const mcpServer = new McpServer(
             {
@@ -60,7 +79,7 @@ export default class MCPServer {
         return mcpServer;
     }
 
-    #setupMCPTools(mcpServer) {
+    #setupMCPTools(mcpServer: McpServer): void {
         // Register tools/list handlers
         mcpServer.registerTool(
             'get_xd_connection_status',
@@ -81,7 +100,7 @@ export default class MCPServer {
     }
 
     // MCP tool to get connection status
-    async #getConnectionStatus() {
+    async #getConnectionStatus(): Promise<any> {
         return this.#returnMcpSuccessResponse({
             connected: this.wsServer.isConnected(),
             connectionId: this.wsServer.getConnectionId(),
@@ -89,7 +108,7 @@ export default class MCPServer {
     }
 
     // MCP tool to get selected node
-    async #getSelectedNode() {
+    async #getSelectedNode(): Promise<any> {
         try {
             if (!this.wsServer.isConnected()) {
                 throw new Error('No Adobe XD plugin connected. Please ensure the XD plugin is installed and running.');
@@ -107,7 +126,7 @@ export default class MCPServer {
                 data: selectedNode.image,
                 mimeType: 'image/png',
             });
-        } catch (error) {
+        } catch (error: any) {
             return this.#returnMcpErrorResponse({
                 message: 'Error getting selection from Adobe XD',
                 error: error.message,
@@ -115,12 +134,8 @@ export default class MCPServer {
         }
     }
 
-    constructor(wsServer) {
-        this.wsServer = wsServer;
-    }
-
     // Stateless MCP request handler, that creates server & transport on the fly
-    async handleRequest(req, res) {
+    async handleRequest(req: Request, res: Response): Promise<void> {
         try {
             const server = this.#getServer();
             const transport = new StreamableHTTPServerTransport({
@@ -133,9 +148,9 @@ export default class MCPServer {
             });
 
             await server.connect(transport);
-            await transport.handleRequest(req, res, req.body);
-        } catch (error) {
-            logger.server('mcp-request-error', 'Error handling MCP request:', error);
+            await transport.handleRequest(req, res);
+        } catch (error: any) {
+            logger.server('mcp-request-error', `Error handling MCP request: ${error}`);
 
             if (!res.headersSent) {
                 res.status(500).json({

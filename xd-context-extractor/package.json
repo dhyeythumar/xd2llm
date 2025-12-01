@@ -1,6 +1,6 @@
 {
     "name": "@dhyeythumar/xd-context-extractor",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "displayName": "Adobe XD Context Extractor",
     "description": "Adobe XD plugin that extracts design context from XD mockups.",
     "license": "MIT",

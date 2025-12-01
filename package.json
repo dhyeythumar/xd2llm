@@ -1,8 +1,8 @@
 {
     "name": "@dhyeythumar/xd2llm",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "displayName": "XD 2 LLM",
-    "description": "Bridges Adobe XD with LLMs to provide design context, so LLMs can generate UI code more accurately based on the actual design tokens.",
+    "description": "Bridges Adobe XD design tool with LLMs to provide design context, so LLMs can generate UI code more accurately based on the actual design tokens.",
     "license": "MIT",
     "author": {
         "name": "Dhyey Thumar",
