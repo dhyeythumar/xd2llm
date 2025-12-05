@@ -2,16 +2,14 @@
 
 import type { Express, Request, Response } from 'express';
 import type { Server as HTTPServer } from 'http';
-import type { Socket } from 'net';
 
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import WSServer from './ws.server.js';
-import MCPServer from './mcp.server.js';
+import CustomMCPServer from './mcp.server.js';
 import Logger from './logger.js';
-
-const PORT = 4000;
-const logger = new Logger('server');
+import { MSGS, PORT, SERVER_NAME } from './const.js';
 
 /**
  * Single server process that handles both:
@@ -22,16 +20,35 @@ const logger = new Logger('server');
  * separation of concerns through modular design.
  */
 class Server {
-    private wsServer: WSServer;
-    private mcpServer: MCPServer;
+    private readonly logger = new Logger(SERVER_NAME);
+    private readonly wsServer: WSServer;
+    private readonly mcpServer: CustomMCPServer;
 
     private app: Express;
     private httpServer: HTTPServer | null;
-    private connections: Set<Socket>;
     private currentPort: number = PORT;
     private startTime: string | null;
 
-    private setupHTTPServer(): void {
+    constructor() {
+        try {
+            this.logger.info('Setting up server...');
+
+            this.app = express();
+            this.httpServer = http.createServer(this.app);
+            this.startTime = null;
+
+            this.setupHTTPServer();
+            this.handleInterruptionAndExceptions();
+
+            this.wsServer = new WSServer();
+            this.mcpServer = new CustomMCPServer(this.wsServer);
+        } catch (error: any) {
+            this.logger.error('Error setting up server:', error);
+            process.exit(1);
+        }
+    }
+
+    private setupHTTPServer() {
         this.app.use(
             cors({
                 origin: '*',
@@ -39,12 +56,15 @@ class Server {
                 allowedHeaders: ['Content-Type', 'mcp-session-id'],
             })
         );
-        this.app.use(express.json({ limit: '10mb' }));
 
-        // Add MCP HTTP transport endpoint to the existing WebSocket server
+        // Add MCP HTTP transport endpoint BEFORE JSON middleware
+        // MCP transport needs raw request stream, not parsed JSON
         this.app.all('/mcp', async (req: Request, res: Response) => {
             await this.mcpServer.handleRequest(req, res);
         });
+
+        // Apply JSON parsing middleware only to routes that need it (not /mcp)
+        this.app.use(express.json({ limit: '10mb' }));
 
         // Health check endpoint for testing
         this.app.get('/health', (_, res: Response) => {
@@ -65,125 +85,81 @@ class Server {
         });
     }
 
-    constructor() {
-        this.wsServer = new WSServer();
-        this.mcpServer = new MCPServer(this.wsServer);
-
-        this.app = express();
-        this.httpServer = null;
-        this.connections = new Set(); // Track active connections
-        this.startTime = null;
-
-        this.setupHTTPServer();
-    }
-
-    start(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            // Start HTTP server
-            this.httpServer = this.app.listen(PORT, async () => {
-                this.startTime = new Date().toISOString();
-                logger.server('http-server-started', `HTTP server listening on port ${PORT}`);
-
-                // Setup WebSocket server
-                this.wsServer.setupWSServer(this.httpServer!);
-
-                resolve();
-            });
-
-            // Track connections for proper shutdown
-            this.httpServer.on('connection', (socket: Socket) => {
-                this.connections.add(socket);
-                socket.on('close', () => {
-                    this.connections.delete(socket);
-                });
-            });
+    start() {
+        return new Promise<void>((resolve, reject) => {
+            if (!this.httpServer) return reject(new Error(MSGS.HTTP_SERVER_NOT_INITIALIZED));
 
             this.httpServer.on('error', (error: Error) => {
+                this.logger.server('error', `${MSGS.SERVER_ERROR} ${error.message}`);
                 reject(error);
             });
+
+            this.httpServer.on('listening', () => {
+                try {
+                    this.startTime = new Date().toISOString();
+                    this.logger.server('listening', MSGS.SERVER_LISTENING);
+                    this.wsServer.start(this.httpServer!);
+                    resolve();
+                } catch (error: any) {
+                    reject(error);
+                }
+            });
+
+            // Start HTTP server
+            this.httpServer.listen(PORT);
         });
     }
 
-    async close(): Promise<void> {
+    private async close(signal: string) {
         try {
+            this.logger.server('shutdown', `Closing HTTP server due to ${signal} signal`);
+
             // Close WebSocket server first
-            if (this.wsServer) this.wsServer.close();
+            await this.wsServer?.close();
 
             // Close HTTP server with timeout
             if (this.httpServer) {
-                // First, destroy all existing connections
-                for (const socket of this.connections) {
-                    socket.destroy();
-                }
-                this.connections.clear();
+                this.httpServer.closeAllConnections();
+                this.httpServer.removeAllListeners();
 
                 // Close the server with a timeout
                 await Promise.race([
                     new Promise<void>((resolve) => {
                         this.httpServer!.close(() => {
-                            logger.server('http-closed', 'HTTP server closed successfully');
                             resolve();
                         });
                     }),
                     new Promise<void>((resolve) => {
                         setTimeout(() => {
-                            logger.warn('HTTP server close timeout, forcing shutdown');
+                            this.logger.warn(MSGS.HTTP_SERVER_CLOSE_TIMEOUT);
                             resolve();
                         }, 2000);
                     }),
                 ]);
             }
+            this.logger.server('closed', MSGS.SERVER_CLOSED);
+            process.exit(0);
         } catch (error: any) {
-            logger.error('Error during server shutdown:', error);
-            // Don't throw error to allow process to exit
+            this.logger.error(`${MSGS.SERVER_ERROR} ${error.message}`);
+            process.exit(1);
         }
+    }
+
+    private handleInterruptionAndExceptions() {
+        // Setup graceful shutdown - only register once
+        process.once('SIGINT', () => this.close('SIGINT'));
+        process.once('SIGTERM', () => this.close('SIGTERM'));
+        process.once('uncaughtException', (error: Error) => {
+            this.logger.error('Uncaught exception:', error.message);
+            this.close('uncaughtException');
+        });
+        process.once('unhandledRejection', (reason: Error) => {
+            this.logger.error('Unhandled rejection:', reason.message);
+            this.close('unhandledRejection');
+        });
     }
 }
 
-// Start the server if this file is run directly
-logger.info('Setting up server');
-const server = new Server();
-
-let isShuttingDown = false;
-
-// Graceful shutdown function
-const gracefulShutdown = async (signal: string) => {
-    if (isShuttingDown) {
-        logger.warn('Already shutting down, forcing exit...');
-        process.exit(1);
-    }
-
-    isShuttingDown = true;
-    logger.server('shutdown-start', `Starting server shutdown... (${signal})`);
-
-    try {
-        await server.close();
-        logger.server('shutdown-complete', 'Graceful shutdown completed');
-        process.exit(0);
-    } catch (error: any) {
-        logger.error('Error during graceful shutdown:', error);
-        process.exit(1);
-    }
-};
-
-// Setup graceful shutdown - only register once
-process.once('SIGINT', () => gracefulShutdown('SIGINT'));
-process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
-
-process.once('uncaughtException', (error: Error) => {
-    logger.error('Uncaught exception:', error.message);
-    gracefulShutdown('uncaughtException');
-});
-
-process.once('unhandledRejection', (reason: Error) => {
-    logger.error('Unhandled rejection:', reason.message);
-    gracefulShutdown('unhandledRejection');
-});
-
-// Start server
-server.start().catch((error: Error) => {
-    logger.error('Failed to start server:', error.message);
-    process.exit(1);
-});
-
-export default Server;
+(() => {
+    new Server().start().catch(() => process.exit(1));
+})();

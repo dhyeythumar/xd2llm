@@ -4,63 +4,71 @@
  * This module contains all MCP-specific functionality including
  * tool definitions, request handling, and response formatting.
  */
+import type { Request, Response } from 'express';
+import type { Maybe, StringRecord } from './types.js';
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import logger from './logger.js';
 import WSServer from './ws.server.js';
-import { Request, Response } from 'express';
+import Logger from './logger.js';
+import { MCP_SERVER_NAME, MSGS } from './const.js';
 
-interface MCPResponse {
-    content: Array<{
-        type: string;
-        text?: string;
-        data?: string;
-        mimeType?: string;
-        [key: string]: any;
-    }>;
-    isError?: boolean;
-}
+type TextContent = {
+    type: 'text';
+    text: string;
+};
 
-export default class MCPServer {
+type ImageContent = {
+    type: 'image';
+    data: string;
+    mimeType: 'image/png';
+};
+
+type MCPResponse = {
+    content: Array<TextContent | ImageContent>;
+    isError: boolean;
+};
+
+export default class CustomMCPServer {
+    private readonly logger = new Logger(MCP_SERVER_NAME);
     private wsServer: WSServer;
 
     constructor(wsServer: WSServer) {
         this.wsServer = wsServer;
     }
 
-    #returnMcpErrorResponse(message: any): MCPResponse {
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: JSON.stringify(message, null, 4),
-                },
-            ],
-            isError: true,
-        };
-    }
-
-    #returnMcpSuccessResponse(message: any, extraDetails: any = {}): MCPResponse {
-        // Initialize response with message
+    private getErrorResponse(message: StringRecord) {
         const response: MCPResponse = {
             content: [
                 {
                     type: 'text',
-                    text: JSON.stringify(message, null, 4),
+                    text: JSON.stringify(message, null, 2),
                 },
             ],
+            isError: true,
+        };
+        return response;
+    }
+
+    private getSuccessResponse(message: StringRecord, extraDetails?: TextContent | ImageContent) {
+        const response: MCPResponse = {
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify(message, null, 2),
+                },
+            ],
+            isError: false,
         };
 
         // Add extra details if provided
         if (extraDetails && Object.keys(extraDetails).length > 0) {
             response.content.push(extraDetails);
         }
-
         return response;
     }
 
-    #getServer(): McpServer {
+    private getServer(): McpServer {
         // Initialize stateless MCP server
         const mcpServer = new McpServer(
             {
@@ -75,18 +83,18 @@ export default class MCPServer {
         );
 
         // Register tools with the stateless MCP server
-        this.#setupMCPTools(mcpServer);
+        this.setupMCPTools(mcpServer);
         return mcpServer;
     }
 
-    #setupMCPTools(mcpServer: McpServer): void {
+    private setupMCPTools(mcpServer: McpServer) {
         // Register tools/list handlers
         mcpServer.registerTool(
             'get_xd_connection_status',
             {
                 description: 'Check if Adobe XD plugin is connected and ready to provide data',
             },
-            async () => await this.#getConnectionStatus()
+            () => this.getConnectionStatus()
         );
 
         mcpServer.registerTool(
@@ -95,41 +103,42 @@ export default class MCPServer {
                 description:
                     'Get details of the currently selected node in Adobe XD in JSON & image format. Returns comprehensive design specifications including dimensions, visual properties, typography, base64 encoded image, and more.',
             },
-            async () => await this.#getSelectedNode()
+            async () => await this.getSelectedNode()
         );
     }
 
     // MCP tool to get connection status
-    async #getConnectionStatus(): Promise<any> {
-        return this.#returnMcpSuccessResponse({
-            connected: this.wsServer.isConnected(),
-            connectionId: this.wsServer.getConnectionId(),
-        });
+    private getConnectionStatus() {
+        try {
+            return this.getSuccessResponse({
+                connected: this.wsServer.isXDClientConnected(),
+                connectionId: this.wsServer.getXDClientConnectionId(),
+            });
+        } catch (error: unknown) {
+            return this.getErrorResponse({
+                error: (error as Error).message,
+                context: MSGS.TOOL_ERROR,
+            });
+        }
     }
 
     // MCP tool to get selected node
-    async #getSelectedNode(): Promise<any> {
+    private async getSelectedNode() {
         try {
-            if (!this.wsServer.isConnected()) {
-                throw new Error('No Adobe XD plugin connected. Please ensure the XD plugin is installed and running.');
-            }
-
             const selectedNode = await this.wsServer.requestSelectedNode();
             if (!selectedNode || !selectedNode.json || !selectedNode.image) {
-                throw new Error(
-                    'Failed to get selected node. Please ensure node is selected in Adobe XD and try again'
-                );
+                throw new Error(MSGS.CONTENT_MISSING_ERROR);
             }
 
-            return this.#returnMcpSuccessResponse(selectedNode.json, {
+            return this.getSuccessResponse(selectedNode.json, {
                 type: 'image',
                 data: selectedNode.image,
                 mimeType: 'image/png',
             });
-        } catch (error: any) {
-            return this.#returnMcpErrorResponse({
-                message: 'Error getting selection from Adobe XD',
-                error: error.message,
+        } catch (error: unknown) {
+            return this.getErrorResponse({
+                error: (error as Error).message,
+                context: MSGS.TOOL_ERROR,
             });
         }
     }
@@ -137,7 +146,7 @@ export default class MCPServer {
     // Stateless MCP request handler, that creates server & transport on the fly
     async handleRequest(req: Request, res: Response): Promise<void> {
         try {
-            const server = this.#getServer();
+            const server = this.getServer();
             const transport = new StreamableHTTPServerTransport({
                 sessionIdGenerator: undefined,
             });
@@ -149,8 +158,8 @@ export default class MCPServer {
 
             await server.connect(transport);
             await transport.handleRequest(req, res);
-        } catch (error: any) {
-            logger.server('mcp-request-error', `Error handling MCP request: ${error}`);
+        } catch (error: unknown) {
+            this.logger.error(`${MSGS.MCP_REQUEST_ERROR} ${(error as Error).message}`);
 
             if (!res.headersSent) {
                 res.status(500).json({
