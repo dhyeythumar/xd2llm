@@ -35,7 +35,7 @@ module.exports = `<div class="container">
                 ></textarea>
             </div>
             <div class="error-message hide"></div>
-            <button type="button" class="save-button hide">Save Settings</button>
+            <button type="button" class="save-button hide">Save Style Variables</button>
         </div>
         
         <div id="save-status" class="save-status hide"></div>

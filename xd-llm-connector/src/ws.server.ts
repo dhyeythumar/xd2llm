@@ -177,7 +177,7 @@ export default class WSServer extends EventEmitter {
     // Start WebSocket server
     start(httpServer: HTTPServer) {
         this.wss = new WebSocketServer({ server: httpServer });
-        this.logger.server('listening', MSGS.SERVER_LISTENING);
+        this.logger.server('start', MSGS.SERVER_LISTENING);
 
         this.wss.on('error', (error: Error) => {
             this.logger.server('error', `${MSGS.SERVER_ERROR} ${error.message}`);
@@ -200,30 +200,24 @@ export default class WSServer extends EventEmitter {
 
     // Cleanup & shutdown WebSocket server
     close() {
-        return new Promise<void>((resolve) => {
-            try {
-                this.logger.server('shutdown', `Closing WebSocket server...`);
-
-                // Close XD plugin connection if exists
-                if (this.isXDClientConnected()) {
-                    this.xdClient!.ws.terminate();
-                    this.xdClient!.ws.removeAllListeners();
-                    this.xdClient = null;
-                }
+        try {
+            this.logger.server('close', MSGS.SERVER_CLOSING);
+            if (this.wss) {
+                // Close all active WebSocket connections
+                this.wss.clients.forEach((client: WebSocket) => {
+                    if (client.readyState === WebSocket.OPEN || client.readyState === WebSocket.CONNECTING) {
+                        client.terminate();
+                        client.removeAllListeners();
+                    }
+                });
 
                 // Close WebSocket server
-                if (this.wss) {
-                    this.wss.removeAllListeners();
-                    this.wss.close((error: Error | undefined) => {
-                        if (error) throw error;
-                        this.logger.server('closed', MSGS.SERVER_CLOSED);
-                        resolve();
-                    });
-                }
-            } catch (error: unknown) {
-                this.logger.error(`${MSGS.SERVER_ERROR} ${(error as Error).message}`);
-                resolve();
+                this.wss.close();
+                this.wss.removeAllListeners();
             }
-        });
+            this.logger.server('closed', MSGS.SERVER_CLOSED);
+        } catch (error: unknown) {
+            this.logger.error(`${MSGS.SERVER_ERROR} ${(error as Error).message}`);
+        }
     }
 }

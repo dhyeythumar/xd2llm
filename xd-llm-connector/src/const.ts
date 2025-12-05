@@ -9,6 +9,7 @@ export const WS_RESPONSE_TIMEOUT_MS = 5000;
 export const MSGS = {
     // Info messages
     SERVER_LISTENING: 'Server listening...',
+    SERVER_CLOSING: 'Closing server...',
     SERVER_CLOSED: 'Server closed successfully!',
 
     // Warning messages

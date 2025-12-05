@@ -112,10 +112,10 @@ class Server {
 
     private async close(signal: string) {
         try {
-            this.logger.server('shutdown', `Closing HTTP server due to ${signal} signal`);
+            this.logger.server('close', `${MSGS.SERVER_CLOSING} (${signal} signal)`);
 
             // Close WebSocket server first
-            await this.wsServer?.close();
+            this.wsServer?.close();
 
             // Close HTTP server with timeout
             if (this.httpServer) {

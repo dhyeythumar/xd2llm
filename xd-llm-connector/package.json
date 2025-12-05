@@ -10,13 +10,13 @@
         "url": "https://github.com/dhyeythumar"
     },
     "type": "module",
-    "main": "src/server.js",
+    "main": "src/server.ts",
     "bin": {
-        "xd-server": "src/server.js",
-        "xd-llm-connector": "src/server.js"
+        "xd-server": "dist/server.js",
+        "xd-llm-connector": "dist/server.js"
     },
     "files": [
-        "src/",
+        "dist/",
         "package.json",
         "README.md",
         "SETUP.md"
