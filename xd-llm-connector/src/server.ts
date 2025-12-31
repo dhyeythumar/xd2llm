@@ -147,8 +147,14 @@ class Server {
 
     private handleInterruptionAndExceptions() {
         // Setup graceful shutdown - only register once
-        process.once('SIGINT', () => this.close('SIGINT'));
-        process.once('SIGTERM', () => this.close('SIGTERM'));
+        process.once('SIGINT', () => {
+            this.logger.info('Received SIGINT signal');
+            this.close('SIGINT');
+        });
+        process.once('SIGTERM', () => {
+            this.logger.info('Received SIGTERM signal');
+            this.close('SIGTERM');
+        });
         process.once('uncaughtException', (error: Error) => {
             this.logger.error('Uncaught exception:', error.message);
             this.close('uncaughtException');

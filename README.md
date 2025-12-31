@@ -1,14 +1,14 @@
-# XD 2 LLM
+# XD2LLM
 
-A comprehensive ecosystem for bridging Adobe XD with AI assistants and Large Language Models (LLMs), enabling real-time design data extraction and AI-powered design workflows.
+A comprehensive ecosystem for bridging Adobe XD with AI assistants and Large Language Models (LLMs), enabling real-time design data extraction and AI-powered design to code workflows.
 
 ## 🏗️ Architecture Overview
 
-XD 2 LLM consists of two core components that work together to enable AI-powered design workflows:
+XD2LLM consists of two core components that work together to enable AI-powered design to code workflows:
 
 ### 🔌 [XD Context Extractor](./xd-context-extractor/)
 
-Adobe XD plugin that extracts design specifications and communicates with external services.
+Adobe XD plugin that extracts design specifications and shares them with external services.
 
 **[📖 Read Plugin Documentation →](./xd-context-extractor/README.md)**
 
@@ -26,11 +26,11 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
     <img src="./images/flow-diagram.png" class="image" alt="Flow Diagram" height="400">
 </p>
 
-1. **AI Assistant** calls MCP tools (e.g., "get selected XD node")
-2. **MCP Server** processes request via EventEmitter pattern
-3. **WebSocket Bridge** sends real-time request to XD
-4. **XD Plugin** extracts design data and responds
-5. **Response flows back** through the chain to the AI
+0. User selects any UI group/component inside the Adobe XD app.
+1. Upon prompt, AI Assistant calls MCP tools (e.g., "get selected XD node").
+2. XD Server accepts the request & forwards it to the XD plugin via WebSocket bridge.
+3. XD Plugin extracts design data and responds back to the XD server.
+4. Response flows back through the chain to the AI.
 
 ### Sequence Diagram
 
@@ -43,17 +43,20 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 1. **XD Context Extractor & XD LLM Connector Setup**:
 
     ```bash
-    # This command will setup XD Context Extractor as well as XD LLM Connector
+    # Note: Keep your Adobe XD app closed while setting up the plugin.
+    # This command will set up the XD Context Extractor plugin and XD LLM Connector.
+
     npm run setup
     ```
 
 2. **Start MCP Server**:
 
     ```bash
-    xd-llm-connector
+    xd2llm-server
     ```
 
-3. Configure LLM Client
+3. **Configure LLM Client**:
+   
    Configure your MCP-compatible LLM client (Claude Desktop, Cursor, etc.) with:
 
 -   **Endpoint**: `http://localhost:4000/mcp`
@@ -67,27 +70,20 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 
 ## 💡 What You Can Do
 
--   **🤖 AI-Powered Design Analysis**: Get intelligent insights about your XD designs
--   **📝 Design System Documentation**: Automatically extract design tokens and specifications
--   **⚡ Code Generation**: Generate CSS/SCSS directly from XD designs
--   **🔄 Design-to-Code Workflows**: Seamlessly bridge design and development processes
+-   **🤖 AI-Powered Design Analysis**: Get intelligent insights about your XD designs.
+-   **📝 Design System Documentation**: Automatically extract design tokens and specifications.
+-   **⚡ Code Generation**: Generate React components with CSS/SCSS directly from XD designs.
+-   **🔄 Design-to-Code Workflows**: Seamlessly bridge design and development processes.
 
 ## 📊 Performance Results
 
-XD 2 LLM delivers exceptional improvements over traditional AI-generated skeletons:
+XD2LLM delivers exceptional improvements over traditional AI-generated UI code:
 
--   **+50% Average Accuracy Improvement** across all complexity levels
--   **60-90% Structure Accuracy** achieved with XD 2 LLM
--   **Consistent Performance** from easy to hard complexity components
+-   **+50% Average Accuracy Improvement** across all complexity levels.
+-   **60-90% Structure Accuracy** achieved with XD2LLM.
+-   **Consistent Performance** from easy to hard complexity components.
 
 **[📈 View Detailed Results & Comparisons →](./RESULTS.md)**
-
-## 🛠️ Development
-
-Each component has detailed development guides:
-
--   **XD Context Extractor**: [Development Guide](./xd-context-extractor/README.md#development)
--   **XD LLM Connector**: [Development Guide](./xd-llm-connector/README.md#development)
 
 ## 🤝 Contributing
 
