@@ -1,0 +1,8 @@
+node_modules/
+dist/
+package/
+*.tgz
+xd-llm-connector/*
+!xd-llm-connector/dist/
+!xd-llm-connector/package.json
+!xd-llm-connector/package-lock.json

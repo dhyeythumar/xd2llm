@@ -4,31 +4,21 @@
     "displayName": "Adobe XD LLM Connector",
     "description": "Server that provides bridge between Adobe XD plugin and LLMs, so LLMs can query design context and generate UI code more accurately.",
     "license": "MIT",
+    "private": true,
     "author": {
         "name": "Dhyey Thumar",
         "email": "dhyeythumar@gmail.com",
         "url": "https://github.com/dhyeythumar"
     },
     "type": "module",
-    "main": "src/server.ts",
-    "bin": {
-        "xd-server": "dist/server.js",
-        "xd2llm-server": "dist/server.js",
-        "xd2llm-connector": "dist/server.js",
-        "xd-llm-connector": "dist/server.js"
-    },
-    "files": [
-        "dist/",
-        "package.json",
-        "README.md",
-        "SETUP.md"
-    ],
+    "main": "dist/server.js",
     "scripts": {
         "build": "tsc",
-        "setup": "npm ci && npm run build && npm link",
+        "setup": "npm install",
         "dev": "tsx watch src/server.ts",
         "start": "tsx src/server.ts",
-        "inspector": "npx @modelcontextprotocol/inspector"
+        "inspector": "npx @modelcontextprotocol/inspector",
+        "prepack": "npm run build"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.18.1",

@@ -1,5 +1,5 @@
 {
-    "name": "@dhyeythumar/xd2llm",
+    "name": "xd2llm",
     "version": "2.0.0",
     "displayName": "XD 2 LLM",
     "description": "Bridges Adobe XD design tool with LLMs to provide design context, so LLMs can generate UI code more accurately based on the actual design tokens.",
@@ -15,16 +15,36 @@
         "mcp-server",
         "websocket",
         "adobe-xd-plugin",
-        "mcp-tools"
+        "mcp-tools",
+        "design-to-code",
+        "ai-assisted-development",
+        "model-context-protocol",
+        "adobe-xd"
     ],
     "repository": {
         "type": "git",
         "url": "https://github.com/dhyeythumar/xd2llm.git"
     },
     "homepage": "https://github.com/dhyeythumar/xd2llm",
+    "bugs": {
+        "url": "https://github.com/dhyeythumar/xd2llm/issues"
+    },
+    "workspaces": [
+        "xd-context-extractor",
+        "xd-llm-connector"
+    ],
+    "bin": {
+        "xd-server": "xd-llm-connector/dist/server.js",
+        "xd2llm-server": "xd-llm-connector/dist/server.js",
+        "xd2llm-connector": "xd-llm-connector/dist/server.js",
+        "xd-llm-connector": "xd-llm-connector/dist/server.js"
+    },
     "scripts": {
-        "install": "cd xd-context-extractor && npm ci && cd .. && cd xd-llm-connector && npm ci",
-        "setup": "cd xd-context-extractor && npm run setup && cd .. && cd xd-llm-connector && npm run setup"
+        "prepack": "cd xd-context-extractor && npm run prepack && cd .. && cd xd-llm-connector && npm run prepack",
+        "postinstall": "cd xd-context-extractor && npm run setup && cd .. && cd xd-llm-connector && npm run setup"
+    },
+    "publishConfig": {
+        "access": "public"
     },
     "packageManager": "npm@11.4.2",
     "engines": {

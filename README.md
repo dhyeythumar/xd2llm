@@ -38,26 +38,29 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
     <img src="./images/sequence-diagram.png" class="image" alt="Sequence Diagram" height="400">
 </p>
 
-## 🚀 Quick Start
+## 🚀 Quick Start (as a package)
 
-1. **XD Context Extractor & XD LLM Connector Setup**:
+1. **Install XD2LLM globally**:
 
     ```bash
-    # Note: Keep your Adobe XD app closed while setting up the plugin.
-    # This command will set up the XD Context Extractor plugin and XD LLM Connector.
+    # Note: Keep your Adobe XD app closed while installing.
+    # This will install the package and set up the XD Context Extractor plugin.
 
-    npm run setup
+    npm install -g xd2llm
     ```
 
 2. **Start MCP Server**:
 
     ```bash
+    # Start the server using any of the available commands:
     xd2llm-server
+    # or
+    xd-server
     ```
 
 3. **Configure LLM Client**:
-   
-   Configure your MCP-compatible LLM client (Claude Desktop, Cursor, etc.) with:
+
+    Configure your MCP-compatible LLM client (Claude Desktop, Cursor, etc.) with:
 
 -   **Endpoint**: `http://localhost:4000/mcp`
 -   **Detailed setup**: See [XD LLM Connector Setup Guide](./xd-llm-connector/SETUP.md)
