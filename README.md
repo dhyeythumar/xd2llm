@@ -100,6 +100,49 @@ XD2LLM delivers exceptional improvements over traditional AI-generated UI code:
 
 MIT License - see [LICENSE](./LICENSE) file for details.
 
+## 📦 NPM Package Publish Guide
+
+### Prerequisites
+
+-   npm account with publishing rights
+-   Logged in to npm: `npm login`
+
+### Publishing Steps
+
+```bash
+# 1. Ensure you're on the main branch with latest changes
+git checkout main
+git pull origin main
+
+# 2. Update version (choose one)
+npm version patch    # 2.0.0 -> 2.0.1 (bug fixes)
+npm version minor    # 2.0.0 -> 2.1.0 (new features)
+npm version major    # 2.0.0 -> 3.0.0 (breaking changes)
+
+# 3. Verify package contents (dry run)
+npm pack --dry-run
+
+# 4. Test package locally (optional but recommended)
+npm pack
+npm install -g ./xd2llm-*.tgz
+
+# 5. Publish to npm
+npm publish
+
+# 6. Verify publication
+npm view xd2llm
+```
+
+### Post-Publish Verification
+
+```bash
+# Install from npm to verify
+npm install -g xd2llm
+
+# Test commands
+xd2llm-server
+```
+
 <style>
 .image {
     max-width: 100%;
