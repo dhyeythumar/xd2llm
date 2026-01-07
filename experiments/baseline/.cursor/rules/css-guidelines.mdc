@@ -1,0 +1,21 @@
+---
+description: Brief documentation outlining the CSS guidelines.
+globs: app/**/*.css
+alwaysApply: false
+---
+
+## CSS (UI Styling) Guidelines
+
+### Property Order Convention
+
+Follow the structured order below to maintain consistency and readability across all CSS files:
+
+-   **Display & Layout**: Properties like: `display`, `position`, `top/right/bottom/left`, `flex`, `grid`, `z-index`, `overflow`, `visibility`.
+-   **Box Model & Backgrounds**: Properties like: `width`, `height`, `margin`, `padding`, `box-sizing`, `border`, `border-radius`, `outline`, `background-color`, `background-image`, `background-*`.
+-   **Typography**: Properties like: `font-family`, `font-weight`, `font-size`, `font-style`, `color`, `line-height`, `letter-spacing`, `text-align`, `text-decoration`, `text-transform`, `white-space`.
+-   **Visual Effects**: Properties like: `cursor`, `opacity`, `box-shadow`, `transform`, `filter`, `pointer-events`.
+-   **Transitions & Animations**
+-   **Pseudo-elements & pseudo-classes**: Properties like: `::before`, `::after`, `:hover`, `:focus`, `:active`
+-   **Media queries**
+
+💡 Tips: Use spacing and line breaks wisely to separate logical groups, especially in large style blocks. This enhances clarity and makes overrides easier to spot during debugging.

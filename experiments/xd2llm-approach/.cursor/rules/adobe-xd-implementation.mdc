@@ -1,0 +1,84 @@
+---
+description: Guidelines for implementing React components from Adobe XD JSON mockups with pixel-perfect accuracy.
+alwaysApply: false
+---
+## Adobe XD JSON Implementation Guidelines
+
+### Priority Order for Implementation
+
+1. **Visual Reference First**: Always prioritize the provided mockup images over text descriptions
+2. **JSON Structure**: Use JSON coordinates and properties for exact measurements
+3. **Design System**: Map XD properties to existing CSS variables
+4. **Responsive Behavior**: Implement desktop or mobile layout from JSON based on user's prompt.
+
+### JSON Structure Understanding
+
+**Key Node Properties:**
+- `bounds`: {x, y, width, height} - Exact positioning and dimensions
+- `visualProperties.typography`: Font family, weight, size, color, line-height
+- `visualProperties.background`: Background colors, border-radius
+- `textContent`: Actual text content to use
+- `semanticType`: NODE type (ICON, SHAPE, TEXT, GROUP)
+
+### Implementation Rules
+
+**Design Token Mapping:**
+- Design spec JSON mostly has CSS variable names
+- Check if XD hexcode colors match existing CSS variables first
+- Map XD font-sizes to CSS variables: `--font-size-18` vs `18px` when available
+
+**Typography & Spacing:**
+- **Typography Precision**: Extract exact font-size, line-height, letter-spacing from JSON
+- **Spacing Accuracy**: Use JSON bounds for margins, padding, gaps
+- Convert XD coordinates to CSS custom properties when necessary
+- Add TODO comments for complex spacing decisions
+
+**Color & Visual:**
+- **Color Matching**: Always use design system variables, never hardcoded colors
+- **Background Handling**: Use `background-image` with `object-fit` for images
+
+**Component Architecture:**
+- **Button Recognition**: Rectangle + Text with same bounds → Button component
+- **Component Splitting**: Large components → Split into smaller, reusable pieces
+- **Shared Styles**: Extract to mixins or utility classes
+
+**Asset Management:**
+- **Icon Handling**: Check existing SVGs in `app/assets/icons/` and `public/` folders first
+- **Never Inline SVGs**: Use Icon component or add TODO for missing assets
+- **Font Loading**: Use `font-display: swap` for custom fonts
+
+**Code Quality:**
+- Follow existing component patterns in codebase
+- Use TypeScript interfaces for props
+- Add proper JSDoc comments for complex components
+
+**Responsive Design:**
+- Use existing mixins (`@include mobile`, `@include tablet-up`)
+- Implement desktop or mobile layout based on user's prompt
+
+### XD-to-React Workflow
+
+**Step-by-Step Process:**
+
+1. **Analyze XD JSON** → Extract component structure
+2. **Map Design Tokens** → Match to existing CSS variables (if available)
+3. **Create Component** → Follow existing patterns
+4. **Implement Styles** → Use CSS property ordering
+5. **Add Responsiveness** → Test mobile/desktop layouts
+6. **Validate Accessibility** → Ensure semantic HTML
+7. **Test Integration** → Verify with existing components
+
+### Implementation Checklist
+
+- [ ] Extract dimensions from JSON bounds
+- [ ] Map typography properties to design system
+- [ ] Check existing SVG assets
+- [ ] Add TODO comments for missing SVG assets
+- [ ] Implement responsive flex/grid based on JSON layouts
+- [ ] Create semantic HTML structure
+- [ ] Add proper CSS property ordering
+- [ ] Validate against mockup image
+- [ ] Create component hierarchy from XD groups (if needed)
+- [ ] Implement accessibility features (if needed)
+- [ ] Optimize for performance (once the component is implemented)
+- [ ] Test visual regression against XD mockup (if possible, don't spend too much time here)

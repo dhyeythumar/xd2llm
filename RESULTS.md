@@ -1,4 +1,4 @@
-# Results
+# Results (TODO)
 
 This document showcases the UI skeleton development improvements achieved using the XD Ecosystem (XD Plugin & XD Server with MCP), comparing it with traditional AI-generated skeletons by just using image to demonstrate enhanced accuracy and code quality for component structure generation.
 
