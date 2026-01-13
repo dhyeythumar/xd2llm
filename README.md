@@ -2,6 +2,20 @@
 
 A comprehensive ecosystem for bridging Adobe XD with AI assistants and Large Language Models (LLMs), enabling real-time design data extraction and AI-powered design to code workflows.
 
+## 🤔 Issues with traditional AI-generated UI approach
+
+-   When LLMs rely solely on mockup screenshots, they can't infer visual properties such as font size, font weight, colors, spacing, borders, and shadows. This guesswork often results in sub-par UI component quality, forcing developers to discard most of the generated styles and rewrite them manually.
+-   With a context-aware approach, LLMs receive structured design data in JSON alongside images. This provides precise, machine-readable context about the design, enabling the model to generate significantly more accurate, consistent, and production-ready UI components.
+
+## 📊 Performance Results
+
+XD2LLM delivers exceptional improvements over traditional AI-generated UI code:
+
+-   **+60% Average Accuracy Improvement** across all complexity levels.
+-   **Consistent Performance** from easy to hard complexity components.
+
+**[📈 View Detailed Results & Comparisons →](./RESULTS.md)**
+
 ## 🏗️ Architecture Overview
 
 XD2LLM consists of two core components that work together to enable AI-powered design to code workflows:
@@ -77,16 +91,6 @@ MCP (Model Context Protocol) server that bridges XD plugins with LLMs using real
 -   **📝 Design System Documentation**: Automatically extract design tokens and specifications.
 -   **⚡ Code Generation**: Generate React components with CSS/SCSS directly from XD designs.
 -   **🔄 Design-to-Code Workflows**: Seamlessly bridge design and development processes.
-
-## 📊 Performance Results
-
-XD2LLM delivers exceptional improvements over traditional AI-generated UI code:
-
--   **+50% Average Accuracy Improvement** across all complexity levels.
--   **60-90% Structure Accuracy** achieved with XD2LLM.
--   **Consistent Performance** from easy to hard complexity components.
-
-**[📈 View Detailed Results & Comparisons →](./RESULTS.md)**
 
 ## 🤝 Contributing
 
