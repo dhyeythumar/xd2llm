@@ -1,0 +1,278 @@
+/*
+ * Contact Form Component Styles
+ * Based on Adobe XD mockup specifications:
+ * - Modal: 896x600px with shadow
+ * - Background overlay: #24262B
+ * - Accent color: #fc0441
+ * - Font: Noto Sans
+ */
+
+/* Overlay */
+.contact-form-overlay {
+    width: 1080px;
+    padding: 74px 143px;
+}
+
+/* Main Card */
+.contact-form {
+    display: flex;
+    width: 896px;
+    height: 600px;
+    margin: 0 auto;
+    background-color: #ffffff1a;
+    box-shadow: 5px 5px 15px 0px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Side */
+.contact-form__left {
+    width: 50%;
+    padding: 60px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Title */
+.contact-form__title {
+    margin: 0 0 32px 0;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 42px;
+    letter-spacing: -0.16px;
+    color: #ffffff;
+}
+
+/* Contact Info Section */
+.contact-form__info {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 60px;
+}
+
+.contact-form__info-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Icon placeholders */
+.contact-form__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border: 2px solid #ffffff;
+    border-radius: 4px;
+    opacity: 0.8;
+}
+
+.contact-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.contact-form__info-text {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #ffffff;
+}
+
+/* Form */
+.contact-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.contact-form__row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+/* Input Fields */
+.contact-form__input {    
+    width: 50%;
+    height: 48px;
+    padding: 0 16px;
+    border: none;
+    background-color: #ffffff26;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #ffffff;
+    box-sizing: border-box;
+}
+
+.contact-form__input::placeholder {
+    color: #ffffff
+}
+
+.contact-form__input:focus {
+    outline: 2px solid #fc0441;
+    outline-offset: -2px;
+}
+
+/* Textarea */
+.contact-form__textarea {
+    width: 100%;
+    height: 96px;
+    padding: 14px 16px;
+    border: none;
+    background-color: #ffffff26;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #ffffff;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.contact-form__textarea::placeholder {
+    color: #ffffff;
+}
+
+.contact-form__textarea:focus {
+    outline: 2px solid #fc0441;
+    outline-offset: -2px;
+}
+
+/* Submit Button */
+.contact-form__button {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 24px;
+    background-color: #fc0441;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.contact-form__button:hover {
+    background-color: #e00339;
+    transform: translateY(-1px);
+}
+
+.contact-form__button:active {
+    transform: translateY(0);
+}
+
+.contact-form__button:focus {
+    outline: 2px solid #fc0441;
+    outline-offset: 2px;
+}
+
+/* Right Side */
+.contact-form__right {
+    width: calc(50% - 16px);
+    position: relative;
+    background-color: #171b29;
+    margin: 16px 16px 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Close Button */
+.contact-form__close {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.contact-form__close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.contact-form__close-icon {
+    font-size: 32px;
+    font-weight: 300;
+    color: #fc0441;
+    line-height: 1;
+}
+
+/* Location Pin Graphic */
+.contact-form__pin {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.contact-form__pin-outer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #303445;
+}
+
+.contact-form__pin-inner {
+    position: absolute;
+    top: 26px;
+    left: 26px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #fa1772;
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+    .contact-form {
+        width: 100%;
+        max-width: 896px;
+        height: auto;
+        flex-direction: column;
+        margin: 20px;
+    }
+
+    .contact-form__left {
+        flex: 1;
+        padding: 40px;
+    }
+
+    .contact-form__right {
+        flex: 0 0 200px;
+        margin: 0 16px 16px 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    .contact-form__left {
+        padding: 24px;
+    }
+
+    .contact-form__row {
+        flex-direction: column;
+    }
+
+    .contact-form__info {
+        margin-bottom: 32px;
+    }
+
+    .contact-form__title {
+        font-size: 28px;
+        line-height: 36px;
+    }
+}

@@ -1,0 +1,50 @@
+/*
+ * Category Tabs Component Styles
+ * Based on Adobe XD mockup specifications
+ * - Font: Noto Sans, 16px, SemiBold
+ * - Gap between tabs: ~24px
+ */
+
+/* Tabs Container */
+.category-tabs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+/* Tab Item */
+.category-tabs__item {
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #ffffff;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.category-tabs__item:hover {
+    opacity: 1;
+}
+
+.category-tabs__item--active {
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .category-tabs {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .category-tabs__item {
+        font-size: 14px;
+    }
+}

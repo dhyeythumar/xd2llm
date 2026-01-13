@@ -1,0 +1,109 @@
+/*
+ * Posts Grid Section Styles
+ * Based on Adobe XD mockup specifications:
+ * - Container: 1366x2043px, background: #24262b
+ * - 3-column masonry layout
+ * - Font: Noto Sans
+ */
+
+/* Section Container */
+.posts-grid {
+    width: 100%;
+    max-width: 1366px;
+    margin: 0 auto;
+    padding: 74px 143px;
+    box-sizing: border-box;
+    background-color: #24262b;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+/* Masonry Grid */
+.posts-grid__masonry {
+    display: flex;
+    gap: 24px;
+    margin-top: 102px; /* 176px - 74px = 102px from tabs to first post */
+}
+
+/* Grid Column */
+.posts-grid__column {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    flex: 1;
+}
+
+/* Footer with View More Button */
+.posts-grid__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 70px;
+}
+
+/* View More Button */
+.posts-grid__button {
+    width: 200px;
+    height: 48px;
+    border: none;
+    border-radius: 24px;
+    background-color: #fc0441;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.posts-grid__button:hover {
+    background-color: #e00339;
+    transform: translateY(-1px);
+}
+
+.posts-grid__button:active {
+    transform: translateY(0);
+}
+
+.posts-grid__button:focus {
+    outline: 2px solid #fc0441;
+    outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .posts-grid {
+        padding: 60px 40px;
+    }
+
+    .posts-grid__masonry {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .posts-grid__column {
+        flex: 0 0 calc(50% - 12px);
+    }
+}
+
+@media (max-width: 768px) {
+    .posts-grid {
+        padding: 40px 20px;
+    }
+
+    .posts-grid__masonry {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+    }
+
+    .posts-grid__column {
+        flex: 1;
+        width: 100%;
+        max-width: 344px;
+        gap: 32px;
+    }
+
+    .posts-grid__footer {
+        margin-top: 40px;
+    }
+}

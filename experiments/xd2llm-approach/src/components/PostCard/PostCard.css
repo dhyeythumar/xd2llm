@@ -1,0 +1,95 @@
+/*
+ * Post Card Component Styles
+ * Based on Adobe XD mockup specifications
+ * - Card width: 344px
+ * - Image heights: 234px (small), 297px (medium), 362px (large)
+ * - Font: Noto Sans
+ */
+
+/* Post Card */
+.post-card {
+    display: flex;
+    flex-direction: column;
+    width: 344px;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+/* Image Wrapper - Variable heights */
+.post-card__image-wrapper {
+    width: 344px;
+    overflow: hidden;
+}
+
+.post-card--small .post-card__image-wrapper {
+    height: 234px;
+}
+
+.post-card--medium .post-card__image-wrapper {
+    height: 297px;
+}
+
+.post-card--large .post-card__image-wrapper {
+    height: 362px;
+}
+
+.post-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Content Area */
+.post-card__content {
+    padding-top: 16px;
+    padding-left: 3px;
+}
+
+/* Category & Date Meta */
+.post-card__meta {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 19px;
+    letter-spacing: 0.39px;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+/* Post Title */
+.post-card__title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 34px;
+    color: #ffffff;
+    margin-bottom: 24px;
+}
+
+/* Post Description */
+.post-card__description {
+    margin: 0;
+    max-width: 300px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 26px;
+    color: #9da1b2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .post-card {
+        width: 100%;
+        max-width: 344px;
+    }
+
+    .post-card__image-wrapper {
+        width: 100%;
+        max-width: 344px;
+    }
+
+    .post-card--small .post-card__image-wrapper,
+    .post-card--medium .post-card__image-wrapper,
+    .post-card--large .post-card__image-wrapper {
+        height: 234px;
+    }
+}
