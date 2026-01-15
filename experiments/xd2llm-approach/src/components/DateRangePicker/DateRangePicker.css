@@ -1,0 +1,384 @@
+/* DateRangePicker Component Styles
+ * Based on Adobe XD mockup specifications
+ * Container: 1100px x 451px
+ * Font: Greycliff CF (using system fallbacks)
+ */
+
+/* ========================================
+   Main Container
+   ======================================== */
+.date-range-picker__container {
+    display: flex;
+    justify-content: center;
+    width: 100vw;
+    padding: 74px 0;
+    background: #f5f5f5;
+}
+
+.date-range-picker {
+    display: flex;
+    flex-direction: column;
+
+    width: 1100px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    // padding: 74px 143px;
+
+    background-color: #ffffff;
+    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.05);
+
+    font-family: 'Greycliff CF', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ========================================
+   Content Area (Calendars + Presets)
+   ======================================== */
+.date-range-picker__content {
+    display: flex;
+    flex: 1;
+}
+
+/* ========================================
+   Calendars Section
+   ======================================== */
+.date-range-picker__calendars {
+    position: relative;
+
+    display: flex;
+    gap: 22px;
+
+    padding: 16px 21px 0;
+}
+
+/* ========================================
+   Navigation Arrows
+   ======================================== */
+.date-range-picker__nav {
+    position: absolute;
+    top: 16px;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+}
+
+.date-range-picker__nav svg {
+    width: 12px;
+    height: 12px;
+
+    color: #1d2634;
+}
+
+.date-range-picker__nav--prev {
+    left: 28px;
+}
+
+.date-range-picker__nav--next {
+    right: 28px;
+}
+`
+.date-range-picker__nav:hover svg {
+    color: #0078ff;
+}
+
+/* ========================================
+   Month Container
+   ======================================== */
+.date-range-picker__month {
+    width: 355px;
+}
+
+.date-range-picker__month-title {
+    margin: 0 0 21px 0;
+    padding: 0;
+
+    font-size: 20px;
+    font-weight: 800;
+    color: #1d2634;
+    line-height: 20px;
+    text-align: center;
+}
+
+/* ========================================
+   Calendar Grid
+   ======================================== */
+.date-range-picker__calendar {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Weekday Headers */
+.date-range-picker__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 42px);
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+.date-range-picker__weekday {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+
+    font-size: 18px;
+    font-weight: 600;
+    color: #bebebe;
+    line-height: 17px;
+}
+
+/* Date Rows */
+.date-range-picker__dates {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.date-range-picker__week {
+    display: grid;
+    grid-template-columns: repeat(7, 42px);
+    gap: 10px;
+}
+
+/* ========================================
+   Individual Date Cells
+   ======================================== */
+.date-range-picker__date {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+
+    background-color: transparent;
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1d2634;
+    line-height: 17px;
+
+    cursor: pointer;
+}
+
+.date-range-picker__date--empty {
+    cursor: default;
+}
+
+.date-range-picker__date:not(.date-range-picker__date--empty):hover {
+    background-color: #f5f5f5;
+}
+
+/* In-Range Dates (between start and end) */
+.date-range-picker__date--in-range {
+    border-radius: 0;
+
+    background-color: #e6f2ff;
+}
+
+/* Range Start - rounded left corners */
+.date-range-picker__date--range-start {
+    border-radius: 50%;
+
+    background-color: #0078ff;
+
+    color: #ffffff;
+}
+
+.date-range-picker__date--range-start::after {
+    content: '';
+
+    position: absolute;
+    top: 0;
+    right: -5px;
+
+    width: 26px;
+    height: 42px;
+
+    background-color: #e6f2ff;
+
+    z-index: -1;
+}
+
+/* Range End - rounded right corners */
+.date-range-picker__date--range-end {
+    border-radius: 50%;
+
+    background-color: #0078ff;
+
+    color: #ffffff;
+}
+
+.date-range-picker__date--range-end::before {
+    content: '';
+
+    position: absolute;
+    top: 0;
+    left: -5px;
+
+    width: 26px;
+    height: 42px;
+
+    background-color: #e6f2ff;
+
+    z-index: -1;
+}
+
+/* Selected Date (single selection or start/end) */
+.date-range-picker__date--selected {
+    border-radius: 50%;
+
+    background-color: #0078ff;
+
+    color: #ffffff;
+}
+
+.date-range-picker__date--selected:hover {
+    background-color: #0066dd;
+}
+
+.date-range-picker__date-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================
+   Predefined Periods Section
+   ======================================== */
+.date-range-picker__presets {
+    display: flex;
+    flex-direction: column;
+
+    width: 287px;
+    height: 387px;
+    padding: 21px;
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 0 8px 0 0;
+
+    background-color: #ffffff;
+}
+
+.date-range-picker__presets-title {
+    margin: 0 0 10px 0;
+    padding: 0;
+
+    font-size: 18px;
+    font-weight: 600;
+    color: #bebebe;
+    line-height: 17px;
+}
+
+.date-range-picker__preset {
+    display: flex;
+    align-items: center;
+
+    height: 42px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+
+    background-color: transparent;
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1d2634;
+    line-height: 17px;
+
+    cursor: pointer;
+}
+
+.date-range-picker__preset:hover {
+    color: #0078ff;
+}
+
+/* ========================================
+   Footer Section
+   ======================================== */
+.date-range-picker__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 11px 21px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.date-range-picker__footer-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.date-range-picker__selected-count {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1d2634;
+    line-height: 17px;
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+.date-range-picker__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 42px;
+    padding: 0 21px;
+    border: none;
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 17px;
+
+    cursor: pointer;
+}
+
+.date-range-picker__button--cancel {
+    min-width: 102px;
+
+    background-color: #ffffff;
+
+    color: #bebebe;
+}
+
+.date-range-picker__button--cancel:hover {
+    background-color: #f5f5f5;
+
+    color: #1d2634;
+}
+
+.date-range-picker__button--done {
+    min-width: 81px;
+
+    background-color: #0078ff;
+
+    color: #ffffff;
+}
+
+.date-range-picker__button--done:hover {
+    background-color: #0066dd;
+}

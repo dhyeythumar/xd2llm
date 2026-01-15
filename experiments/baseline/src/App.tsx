@@ -1,4 +1,4 @@
-import { FeaturedProducts, ArticleGrid, ContactSection } from './components';
+import { FeaturedProducts, ArticleGrid, ContactSection, TeamCalendar, DateRangePicker } from './components';
 import './App.css';
 
 function App() {
@@ -7,6 +7,8 @@ function App() {
             <FeaturedProducts />
             <ArticleGrid />
             <ContactSection />
+            <TeamCalendar />
+            <DateRangePicker />
         </main>
     );
 }
