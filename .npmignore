@@ -1,6 +1,7 @@
 node_modules/
 dist/
 package/
+experiments/
 *.tgz
 xd-llm-connector/*
 !xd-llm-connector/dist/
